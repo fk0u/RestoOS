@@ -88,7 +88,7 @@ public class TablePanel extends JPanel {
             }
         };
         btn.setFont(UIConfig.FONT_BODY);
-        btn.setForeground(Color.DARK_GRAY);
+        btn.setForeground(UIConfig.TEXT_PRIMARY);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
         btn.setContentAreaFilled(false);

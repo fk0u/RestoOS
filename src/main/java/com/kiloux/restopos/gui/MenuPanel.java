@@ -32,6 +32,7 @@ public class MenuPanel extends JPanel {
         header.setOpaque(false);
         JLabel title = new JLabel("Menu Kami", JLabel.CENTER);
         title.setFont(UIConfig.FONT_HEADER);
+        title.setForeground(UIConfig.TEXT_PRIMARY);
         header.add(title, BorderLayout.CENTER);
         add(header, BorderLayout.NORTH);
         
@@ -92,6 +93,7 @@ public class MenuPanel extends JPanel {
         
         JLabel nameLbl = new JLabel(item.getName());
         nameLbl.setFont(UIConfig.FONT_BODY);
+        nameLbl.setForeground(UIConfig.TEXT_PRIMARY);
         
         JLabel priceLbl = new JLabel(String.format("Rp %.0f", item.getPrice()));
         priceLbl.setFont(UIConfig.FONT_TITLE);

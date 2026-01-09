@@ -32,11 +32,13 @@ public class CartPanel extends JPanel {
         header.setOpaque(false);
         JLabel title = new JLabel("Order Summary", JLabel.CENTER);
         title.setFont(UIConfig.FONT_HEADER);
+        title.setForeground(UIConfig.TEXT_PRIMARY);
         
         JButton backBtn = new JButton("Back");
         backBtn.setFocusPainted(false);
         backBtn.setContentAreaFilled(false);
         backBtn.setBorderPainted(false);
+        backBtn.setForeground(UIConfig.TEXT_SECONDARY);
         backBtn.addActionListener(e -> mainFrame.showCard("MENU"));
 
         header.add(backBtn, BorderLayout.WEST);
@@ -61,16 +63,29 @@ public class CartPanel extends JPanel {
         totals = new JPanel(new GridLayout(3, 2));
         totals.setOpaque(false);
         
-        totals.add(new JLabel("Subtotal"));
+        JLabel subtotalText = new JLabel("Subtotal");
+        subtotalText.setForeground(UIConfig.TEXT_SECONDARY);
+        subtotalText.setFont(UIConfig.FONT_BODY);
+        totals.add(subtotalText);
+
         subtotalLbl = new JLabel("Rp 0", SwingConstants.RIGHT);
+        subtotalLbl.setForeground(UIConfig.TEXT_PRIMARY);
+        subtotalLbl.setFont(UIConfig.FONT_BODY);
         totals.add(subtotalLbl);
         
-        totals.add(new JLabel("PPN (11%)"));
+        JLabel taxText = new JLabel("PPN (11%)");
+        taxText.setForeground(UIConfig.TEXT_SECONDARY);
+        taxText.setFont(UIConfig.FONT_BODY);
+        totals.add(taxText);
+
         taxLbl = new JLabel("Rp 0", SwingConstants.RIGHT);
+        taxLbl.setForeground(UIConfig.TEXT_PRIMARY);
+        taxLbl.setFont(UIConfig.FONT_BODY);
         totals.add(taxLbl);
         
         JLabel totalText = new JLabel("Total");
         totalText.setFont(UIConfig.FONT_TITLE);
+        totalText.setForeground(UIConfig.TEXT_PRIMARY);
         totals.add(totalText);
         
         totalLbl = new JLabel("Rp 0", SwingConstants.RIGHT);
