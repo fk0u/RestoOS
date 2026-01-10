@@ -72,31 +72,64 @@ public class TablePanel extends JPanel {
     
     private JButton createTableButton(Table t) {
         boolean isOccupied = "OCCUPIED".equalsIgnoreCase(t.getStatus());
-        Color color = isOccupied ? UIConfig.DANGER_COLOR : UIConfig.PRIMARY_COLOR;
+        Color baseColor = isOccupied ? UIConfig.DANGER_COLOR : UIConfig.PRIMARY_COLOR;
         
-        JButton btn = new JButton("<html><center>Meja " + t.getTableNumber() + "<br/><small>" + t.getCapacity() + " Kursi</small></center></html>") {
+        JButton btn = new JButton() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(isOccupied ? new Color(239, 68, 68, 80) : new Color(16, 185, 129, 80)); // Low opacity fill
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-                g2.setColor(color);
+                
+                int w = getWidth();
+                int h = getHeight();
+                
+                // Draw Chairs (Circles around)
+                g2.setColor(new Color(255, 255, 255, 100));
+                int chairSize = 20;
+                // Top/Bottom chairs
+                g2.fillOval(w/2 - chairSize/2, 5, chairSize, chairSize);
+                g2.fillOval(w/2 - chairSize/2, h - 5 - chairSize, chairSize, chairSize);
+                // Left/Right chairs
+                if (t.getCapacity() > 2) {
+                     g2.fillOval(5, h/2 - chairSize/2, chairSize, chairSize);
+                     g2.fillOval(w - 5 - chairSize, h/2 - chairSize/2, chairSize, chairSize);
+                }
+                
+                // Draw Table Surface
+                int pad = 15;
+                g2.setColor(isOccupied ? new Color(239, 68, 68, 150) : new Color(16, 185, 129, 150));
+                g2.fillRoundRect(pad, pad, w - pad*2, h - pad*2, 20, 20);
+                
+                // Border
+                g2.setColor(baseColor);
                 g2.setStroke(new BasicStroke(2));
-                g2.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 20, 20);
-                super.paintComponent(g);
+                g2.drawRoundRect(pad, pad, w - pad*2, h - pad*2, 20, 20);
+                
+                // Text
+                String text = "Meja " + t.getTableNumber();
+                g2.setFont(UIConfig.FONT_BODY);
+                FontMetrics fm = g2.getFontMetrics();
+                int tw = fm.stringWidth(text);
+                int th = fm.getAscent();
+                
+                g2.setColor(Color.WHITE);
+                g2.drawString(text, (w - tw)/2, (h + th)/2 - 5);
+                
+                String caps = t.getCapacity() + " Kursi";
+                g2.setFont(UIConfig.FONT_SMALL);
+                fm = g2.getFontMetrics(); // Update metrics for small font
+                tw = fm.stringWidth(caps);
+                g2.setColor(new Color(255,255,255,200));
+                g2.drawString(caps, (w - tw)/2, (h + th)/2 + 15);
             }
         };
-        btn.setFont(UIConfig.FONT_BODY);
-        btn.setForeground(UIConfig.TEXT_PRIMARY);
+        btn.setPreferredSize(new Dimension(100, 100)); // Fixed preference
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
         btn.setContentAreaFilled(false);
-        btn.setEnabled(!isOccupied); // Disable occupied for now
+        btn.setEnabled(!isOccupied); 
         
         btn.addActionListener(e -> {
-            // Select table logic
-            // For now, jump to menu
             mainFrame.showCard("MENU");
         });
         

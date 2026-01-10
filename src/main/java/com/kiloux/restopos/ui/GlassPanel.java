@@ -30,7 +30,7 @@ public class GlassPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
         // Glass Background
-        g2.setColor(UIConfig.GLASS_BG);
+        g2.setColor(UIConfig.GLASS_BACKGROUND);
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), borderRadius, borderRadius);
         
         // Border

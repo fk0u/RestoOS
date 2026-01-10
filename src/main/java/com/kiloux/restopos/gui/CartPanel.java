@@ -3,12 +3,16 @@ package com.kiloux.restopos.gui;
 import com.kiloux.restopos.config.DeviceOrientation;
 import com.kiloux.restopos.config.UIConfig;
 import com.kiloux.restopos.service.CartService;
+import com.kiloux.restopos.service.PrintService;
+import com.kiloux.restopos.dao.OrderDAO;
 import com.kiloux.restopos.model.CartItem;
+import com.kiloux.restopos.model.Order;
 import com.kiloux.restopos.ui.AnimatedButton;
 import com.kiloux.restopos.ui.GlassPanel;
 import com.kiloux.restopos.ui.KineticScrollPane;
-
+import com.kiloux.restopos.ui.Toast;
 import java.awt.*;
+import java.util.List;
 import javax.swing.*;
 
 public class CartPanel extends JPanel {
@@ -19,10 +23,12 @@ public class CartPanel extends JPanel {
 
     private GlassPanel footer;
     private JPanel totals;
+    private OrderDAO orderDAO;
 
     public CartPanel(MainFrame frame, DeviceOrientation orientation) {
         this.mainFrame = frame;
         this.orientation = orientation;
+        this.orderDAO = new OrderDAO();
         setLayout(new BorderLayout());
         setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -97,7 +103,7 @@ public class CartPanel extends JPanel {
         
         AnimatedButton checkoutBtn = new AnimatedButton("Checkout & Pay", UIConfig.PRIMARY_COLOR, UIConfig.SECONDARY_COLOR);
         checkoutBtn.setPreferredSize(new Dimension(100, 50));
-        checkoutBtn.addActionListener(e -> showPaymentDialog());
+        checkoutBtn.addActionListener(e -> startCheckoutFlow());
         footer.add(checkoutBtn, BorderLayout.SOUTH);
         
         add(footer, BorderLayout.SOUTH);
@@ -122,19 +128,70 @@ public class CartPanel extends JPanel {
         CartService cart = CartService.getInstance();
         
         for (CartItem item : cart.getItems()) {
-            JPanel p = new JPanel(new BorderLayout());
-            p.setOpaque(false);
-            p.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0,0,0,30)));
-            p.setMaximumSize(new Dimension(400, 70));
+            GlassPanel card = new GlassPanel(new BorderLayout(15, 0));
+            card.setBorderRadius(15);
+            card.setPreferredSize(new Dimension(380, 80));
+            card.setMaximumSize(new Dimension(380, 80));
+            card.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             
-            JLabel name = new JLabel("<html><b>" + item.getMenuItem().getName() + "</b><br/>Rp " + item.getMenuItem().getPrice() + "</html>");
+            // Image (Thumbnail)
+            JLabel imgLabel = new JLabel();
+            imgLabel.setPreferredSize(new Dimension(60, 60));
+            imgLabel.setHorizontalAlignment(SwingConstants.CENTER);
             
-            JPanel qtyPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            try {
+                String path = "/images/" + (item.getMenuItem().getImagePath() != null ? item.getMenuItem().getImagePath() : "default.jpg");
+                java.net.URL imgUrl = getClass().getResource(path);
+                if (imgUrl == null) imgUrl = new java.io.File("src/main/resources" + path).toURI().toURL();
+                
+                if (imgUrl != null) {
+                    java.awt.image.BufferedImage bi = javax.imageio.ImageIO.read(imgUrl);
+                    if (bi != null) {
+                        Image img = bi.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                        imgLabel.setIcon(new ImageIcon(img));
+                    }
+                }
+            } catch (Exception e) {
+                 // Fallback Avatar
+                imgLabel.setText(String.valueOf(item.getMenuItem().getName().charAt(0)));
+                imgLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+                imgLabel.setForeground(Color.WHITE);
+                imgLabel.setOpaque(true);
+                imgLabel.setBackground(new Color(
+                    Math.abs(item.getMenuItem().getName().hashCode() * 12345) % 255,
+                    Math.abs(item.getMenuItem().getName().hashCode() * 67890) % 255, 
+                    Math.abs(item.getMenuItem().getName().hashCode() * 54321) % 255).darker());
+            }
+            card.add(imgLabel, BorderLayout.WEST);
+            
+            // Info
+            JPanel info = new JPanel(new GridLayout(2, 1));
+            info.setOpaque(false);
+            JLabel name = new JLabel(item.getMenuItem().getName());
+            name.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            name.setForeground(Color.WHITE);
+            String noteText = item.getNotes() != null && !item.getNotes().isEmpty() ? " (+Note)" : "";
+            if(!noteText.isEmpty()) name.setText(name.getText() + noteText);
+            
+            JLabel price = new JLabel("Rp " + String.format("%.0f", item.getSubtotal()));
+            price.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            price.setForeground(UIConfig.ACCENT_COLOR);
+            
+            info.add(name);
+            info.add(price);
+            card.add(info, BorderLayout.CENTER);
+            
+            // Controls
+            JPanel qtyPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
             qtyPanel.setOpaque(false);
             
-            JButton minus = new JButton("-");
-            JLabel qty = new JLabel(" " + item.getQuantity() + " ");
-            JButton plus = new JButton("+");
+            JButton minus = createCircleBtn("-", UIConfig.DANGER_COLOR);
+            JLabel qty = new JLabel(String.valueOf(item.getQuantity()));
+            qty.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            qty.setForeground(Color.WHITE);
+            qty.setPreferredSize(new Dimension(30, 30));
+            qty.setHorizontalAlignment(SwingConstants.CENTER);
+            JButton plus = createCircleBtn("+", UIConfig.PRIMARY_COLOR);
             
             minus.addActionListener(e -> {
                 cart.updateQuantity(item.getMenuItem(), item.getQuantity() - 1);
@@ -149,10 +206,13 @@ public class CartPanel extends JPanel {
             qtyPanel.add(qty);
             qtyPanel.add(plus);
             
-            p.add(name, BorderLayout.CENTER);
-            p.add(qtyPanel, BorderLayout.EAST);
+            JPanel controlWrapper = new JPanel(new GridBagLayout());
+            controlWrapper.setOpaque(false);
+            controlWrapper.add(qtyPanel);
+            card.add(controlWrapper, BorderLayout.EAST);
             
-            listPanel.add(p);
+            listPanel.add(card);
+            listPanel.add(Box.createVerticalStrut(10));
         }
         
         subtotalLbl.setText(String.format("Rp %.0f", cart.getSubtotal()));
@@ -163,51 +223,84 @@ public class CartPanel extends JPanel {
         listPanel.repaint();
     }
     
-    private void showPaymentDialog() {
-        JDialog d = new JDialog(mainFrame, "Payment", true);
-        d.setSize(350, 400);
-        d.setLocationRelativeTo(mainFrame);
-        d.setUndecorated(true);
+    private JButton createCircleBtn(String text, Color bg) {
+        JButton btn = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(bg);
+                g2.fillOval(0, 0, getWidth(), getHeight());
+                super.paintComponent(g);
+            }
+        };
+        btn.setPreferredSize(new Dimension(28, 28));
+        btn.setForeground(Color.WHITE);
+        btn.setContentAreaFilled(false);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        return btn;
+    }
+    
+    private void startCheckoutFlow() {
+        CartService cart = CartService.getInstance();
+        if (cart.getItems().isEmpty()) {
+            Toast.show(mainFrame, "Keranjang Kosong!", Toast.Type.ERROR);
+            return;
+        }
+
+        // 1. Ask Name
+        String customerName = JOptionPane.showInputDialog(this, "Masukkan Nama Pelanggan:", "Checkout", JOptionPane.QUESTION_MESSAGE);
+        if (customerName == null || customerName.trim().isEmpty()) return;
+
+        // 2. Ask Payment
+        Object[] options = {"Tunai", "QRIS", "Batal"};
+        int choice = JOptionPane.showOptionDialog(this, "Pilih Metode Pembayaran", "Payment",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+        if (choice == 2 || choice == -1) return; // Batal
         
-        JPanel content = new JPanel(new BorderLayout());
-        content.setBackground(Color.WHITE);
-        content.setBorder(BorderFactory.createLineBorder(UIConfig.ACCENT_COLOR, 2));
+        String paymentMethod = (choice == 0) ? "CASH" : "QRIS";
+        double total = cart.getTotal();
+        double payAmount = total; // Mock exact payment for now (or ask input if cash)
+        if (choice == 0) { // Cash input simulation
+             String payStr = JOptionPane.showInputDialog(this, "Total: " + String.format("%.0f", total) + "\nMasukkan Uang Tunai:");
+             if (payStr == null) return;
+             try {
+                 payAmount = Double.parseDouble(payStr);
+                 if(payAmount < total) {
+                      Toast.show(mainFrame, "Uang tidak cukup!", Toast.Type.ERROR);
+                      return;
+                 }
+             } catch(NumberFormatException e) {
+                 return;
+             }
+        }
         
-        JLabel title = new JLabel("Pilih Metode Pembayaran", SwingConstants.CENTER);
-        title.setFont(UIConfig.FONT_TITLE);
-        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        content.add(title, BorderLayout.NORTH);
+        // 3. Process Order
+        Order order = new Order();
+        order.setTableId(cart.getSelectedTableId() > 0 ? cart.getSelectedTableId() : 0); // 0 for takeaway/unknown
+        order.setOrderType("DINE_IN");
+        order.setStatus("WAITING");
+        order.setTotalAmount(total);
+        order.setPaymentStatus("PAID");
+        order.setCustomerName(customerName);
         
-        JPanel btns = new JPanel(new GridLayout(2, 1, 20, 20));
-        btns.setOpaque(false);
-        btns.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        int orderId = orderDAO.createOrder(order, cart.getItems());
         
-        AnimatedButton cashBtn = new AnimatedButton("CASH", UIConfig.WARNING_COLOR, UIConfig.WARNING_COLOR.brighter());
-        cashBtn.addActionListener(e -> {
-            CartService.getInstance().clear();
-            JOptionPane.showMessageDialog(d, "Pembayaran Tunai Berhasil!\nStruk sedang dicetak...");
-            d.dispose();
-            mainFrame.showCard("ONBOARDING");
-        });
-        
-        AnimatedButton qrisBtn = new AnimatedButton("QRIS Scan", UIConfig.PRIMARY_COLOR, UIConfig.SECONDARY_COLOR);
-        qrisBtn.addActionListener(e -> {
-             CartService.getInstance().clear();
-             JOptionPane.showMessageDialog(d, "QRIS Payment Berhasil!\nStruk sedang dicetak...");
-             d.dispose();
-             mainFrame.showCard("ONBOARDING");
-        });
-        
-        btns.add(cashBtn);
-        btns.add(qrisBtn);
-        
-        content.add(btns, BorderLayout.CENTER);
-        
-        JButton cancel = new JButton("Batal");
-        cancel.addActionListener(e -> d.dispose());
-        content.add(cancel, BorderLayout.SOUTH);
-        
-        d.setContentPane(content);
-        d.setVisible(true);
+        if (orderId != -1) {
+            // Success
+            // Print Receipt
+            PrintService.generateReceipt(order, cart.getItems(), payAmount, payAmount - total);
+            
+            // Clear & Redirect
+            cart.clear();
+            refreshCart();
+            
+            mainFrame.getOrderProcessPanel().setQueueNumber(order.getQueueNumber());
+            mainFrame.showCard("ORDER_PROCESS");
+        } else {
+             Toast.show(mainFrame, "Gagal memproses order!", Toast.Type.ERROR);
+        }
     }
 }
