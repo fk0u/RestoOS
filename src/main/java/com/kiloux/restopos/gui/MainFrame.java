@@ -5,6 +5,7 @@ import com.kiloux.restopos.config.DeviceOrientation;
 import com.kiloux.restopos.config.UIConfig;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Point2D;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 
@@ -77,24 +78,48 @@ public class MainFrame extends JFrame {
         });
         contentPane.add(bootCheck, "BOOT");
         
+        // 2. SHUTDOWN SCREEN
+        contentPane.add(new ShutdownPanel(), "SHUTDOWN");
+        
         // 2. DESKTOP ENVIRONMENT
         JPanel osPanel = new JPanel(new BorderLayout());
-        osPanel.setBackground(new Color(0, 0, 0)); // Black base
+        osPanel.setBackground(UIConfig.BACKGROUND_COLOR); // Light base
         
-        // Wallpaper Layer (JLayeredPane ideally, but JDesktopPane is opaque usually)
+        // Wallpaper Layer - AERO-GNOME HYBRID
         desktop = new JDesktopPane() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
-                // Longhorn Slate/Plex Gradient
-                GradientPaint gp = new GradientPaint(0, 0, new Color(58, 110, 165), 0, getHeight(), new Color(20, 40, 60));
-                g2.setPaint(gp);
-                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
-                // Curve (Abstract Vista)
-                g2.setColor(new Color(255, 255, 255, 20));
-                g2.fillOval(-100, getHeight()/2, getWidth() + 200, getHeight());
+                int w = getWidth();
+                int h = getHeight();
+                
+                // Deep Space Aurora
+                GradientPaint gp = new GradientPaint(0, 0, UIConfig.VISTA_AURORA_DARK, 0, h, UIConfig.VISTA_AURORA_LIGHT);
+                g2.setPaint(gp);
+                g2.fillRect(0, 0, w, h);
+                
+                // Abstract Energy Curves (Ubuntu Orange + Gnome Blue)
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
+                
+                g2.setColor(new Color(60, 140, 220)); // Blue Glow
+                g2.fillOval(-200, h/2 - 200, w+400, h);
+                
+                g2.setColor(new Color(250, 140, 0)); // Orange Glow
+                g2.fillOval(w/2, -100, w, h+200);
+                
+                // Vignette
+                RadialGradientPaint rgp = new RadialGradientPaint(
+                    new Point2D.Double(w/2, h/2), w,
+                    new float[]{0.0f, 1.0f},
+                    new Color[]{new Color(0,0,0,0), new Color(0,0,0,100)}
+                );
+                g2.setPaint(rgp);
+                g2.fillRect(0, 0, w, h);
+                
+                g2.setComposite(AlphaComposite.SrcOver);
             }
         };
         osPanel.add(desktop, BorderLayout.CENTER);
@@ -136,13 +161,17 @@ public class MainFrame extends JFrame {
             if (f.getTitle().contains("Welcome")) f.dispose();
         }
         
+        // Launch Welcome Center
+        WelcomeCenterApp welcome = new WelcomeCenterApp();
+        showApp(welcome);
+
         // Open specific windows based on role
         if ("CLIENT".equalsIgnoreCase(role)) {
             openApp(monitorWindow);
             try { monitorWindow.setMaximum(true); } catch(Exception e){}
         } else if ("ADMIN".equalsIgnoreCase(role)) {
             openApp(adminWindow);
-             try { adminWindow.setMaximum(true); } catch(Exception e){}
+            try { adminWindow.setMaximum(true); } catch(Exception e){}
         } else {
             // Cashier - Full POS
             openApp(posWindow);
@@ -209,27 +238,28 @@ public class MainFrame extends JFrame {
     }
 
     private void initTaskbar(JPanel parent) {
-        // --- GNOME/Mac Style Top Bar ---
+        // --- GNOME 40 Style Top Bar ---
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setPreferredSize(new Dimension(getWidth(), 30));
-        topBar.setBackground(new Color(0, 0, 0, 200)); // Dark Translucent
+        topBar.setBackground(UIConfig.AERO_TASKBAR);
         
-        // Custom Paint for Top Bar
+        // Custom Paint for Top Bar - DARK GLASS
         topBar = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setComposite(AlphaComposite.SrcOver);
-                g2.setColor(new Color(10, 10, 10, 220));
+                // Dark Glass (Gnome style)
+                g2.setColor(new Color(10, 10, 10, 200));
                 g2.fillRect(0, 0, getWidth(), getHeight());
-                // Bottom Line
-                g2.setColor(new Color(255, 255, 255, 50));
+                // Bottom highlight
+                g2.setColor(new Color(255, 255, 255, 30));
                 g2.drawLine(0, getHeight()-1, getWidth(), getHeight()-1);
             }
         };
-        topBar.setPreferredSize(new Dimension(getWidth(), 28));
+        topBar.setPreferredSize(new Dimension(getWidth(), 30));
         
-        // "Activities" / Start
+        // "Activities" / Start Orb
         JButton activitiesBtn = new JButton(" Activities ");
         activitiesBtn.setForeground(Color.WHITE);
         activitiesBtn.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -238,19 +268,43 @@ public class MainFrame extends JFrame {
         activitiesBtn.setFocusPainted(false);
         activitiesBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
-        // Show "Expose" or Menu
+        // Standard Popup Menu (Revert Win8 Overlay)
         JPopupMenu startMenu = new JPopupMenu();
-        startMenu.setBackground(new Color(30, 30, 30));
-        startMenu.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+        startMenu.setBackground(new Color(30, 30, 35));
+        startMenu.setBorder(BorderFactory.createLineBorder(new Color(60, 60, 65)));
         
-        addMenuItem(startMenu, "Tile Windows", e -> tileWindows());
+        addMenuItem(startMenu, "Terminal", e -> { 
+             TerminalApp app = new TerminalApp();
+             showApp(app);
+        });
+        addMenuItem(startMenu, "Control Panel", e -> {
+             ControlPanelApp app = new ControlPanelApp(desktop);
+             showApp(app);
+        });
+        addMenuItem(startMenu, "Files", e -> {
+            if (getComponents() != null) { 
+               ExplorerApp app = new ExplorerApp();
+               showApp(app);
+            }
+        });
+        addMenuItem(startMenu, "Quick Settings", e -> {
+             SettingsApp app = new SettingsApp();
+             showApp(app);
+        });
         startMenu.addSeparator();
         addMenuItem(startMenu, "Log Off", e -> {
+            com.kiloux.restopos.utils.SoundManager.getInstance().play("shutdown");
             desktop.removeAll(); desktop.repaint();
             com.kiloux.restopos.service.UserService.getInstance().logout();
             showLoginWindow();
         });
-        addMenuItem(startMenu, "Shut Down", e -> System.exit(0));
+        addMenuItem(startMenu, "Power Off", e -> {
+            CardLayout cl = (CardLayout) getContentPane().getLayout();
+            cl.show(getContentPane(), "SHUTDOWN");
+            for(Component c : getContentPane().getComponents()) {
+                if(c instanceof ShutdownPanel) ((ShutdownPanel)c).startShutdown();
+            }
+        });
         
         activitiesBtn.addActionListener(e -> startMenu.show(activitiesBtn, 0, activitiesBtn.getHeight()));
         
@@ -295,9 +349,18 @@ public class MainFrame extends JFrame {
         dock.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         // Dock Icons
+        createDockIcon(dock, "Start", e -> {
+            WelcomeCenterApp app = new WelcomeCenterApp(); showApp(app);
+        });
+        createDockIcon(dock, "Computer", e -> {
+            ExplorerApp app = new ExplorerApp(); showApp(app);
+        });
         createDockIcon(dock, "POS", e -> openApp(posWindow));
         createDockIcon(dock, "Admin", e -> openApp(adminWindow));
         createDockIcon(dock, "KDS", e -> openApp(kitchenWindow));
+        createDockIcon(dock, "Settings", e -> {
+            SettingsApp app = new SettingsApp(); showApp(app);
+        });
         createDockIcon(dock, "Media", e -> {
             MediaPlayerApp app = new MediaPlayerApp(); showApp(app);
         });

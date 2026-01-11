@@ -12,59 +12,63 @@ public class UIConfig {
     public static final int SAFE_PADDING = 10;
     public static final int SAFE_PADDING_LANDSCAPE = 10;
 
-    // --- LONGHORN / VISTA / AERO THEME ---
+    // --- AERO-GNOME HYBRID THEME (PREMIUM DARK) ---
     
-    // Desktop - Slate Blue / Plex Main
-    public static final Color BACKGROUND_COLOR = new Color(0x3A6EA5); 
-    public static final Color PANEL_BACKGROUND = new Color(0xF0F0F0); // Light for content areas
+    // Desktop - Deep Aurora
+    public static final Color BACKGROUND_COLOR = new Color(10, 15, 20); // Deep Space
+    public static final Color VISTA_AURORA_DARK = new Color(5, 10, 15);
+    public static final Color VISTA_AURORA_LIGHT = new Color(25, 45, 65);
+    
+    // Panels - Glassy Dark (Adwaita/Aero mix)
+    public static final Color PANEL_BACKGROUND = new Color(30, 30, 35, 200);
 
-    // Vista Glass / Aero
-    public static final Color AERO_GLASS = new Color(240, 245, 255, 180); // Milky White Glass
-    public static final Color AERO_TASKBAR = new Color(10, 10, 10, 220); // Dark Glass
-    public static final Color AERO_START_MENU = new Color(245, 250, 255, 240); // Opaque Glass
+    // Glass - Premium
+    public static final Color AERO_GLASS = new Color(20, 25, 30, 180); // Dark Smokey Glass
+    public static final Color AERO_TASKBAR = new Color(10, 10, 10, 220); // Almost Black
+    public static final Color AERO_START_MENU = new Color(25, 25, 30, 240); 
     
-    // Accents (Vista Green / Turquoise)
-    public static final Color PRIMARY_COLOR = new Color(0x3CB371); // Medium Sea Green (Success/Primary)
-    public static final Color SECONDARY_COLOR = new Color(0x4682B4); // Steel Blue
-    public static final Color ACCENT_COLOR = new Color(0x00CED1); // Dark Turquoise
+    // Accents - Ubuntu/Vista Hybrid
+    public static final Color PRIMARY_COLOR = new Color(52, 101, 164); // Gnome Blue
+    public static final Color SECONDARY_COLOR = new Color(115, 210, 22); // Chameleon Green
+    public static final Color ACCENT_COLOR = new Color(245, 121, 0); // Ubuntu Orange
     
-    public static final Color DANGER_COLOR = new Color(0xCD5C5C); // Indian Red
-    public static final Color WARNING_COLOR = new Color(0xFFA500); // Orange
+    public static final Color DANGER_COLOR = new Color(204, 0, 0); // Gnome Red
+    public static final Color WARNING_COLOR = new Color(237, 212, 0); // Gnome Yellow
 
-    // Text - ClearType
-    public static final Color TEXT_PRIMARY = new Color(20, 20, 20);
-    public static final Color TEXT_SECONDARY = new Color(80, 80, 80);
+    // Text - ClearType White
+    public static final Color TEXT_PRIMARY = new Color(238, 238, 236); // Off-White
+    public static final Color TEXT_SECONDARY = new Color(186, 189, 182); // Light Grey
+    public static final Color TEXT_DARK = new Color(20, 20, 20); 
     
     // Borders & Gradients
-    public static final Color BORDER_COLOR = new Color(160, 160, 160);
-    public static final Color TITLE_START = new Color(40, 60, 80); // Dark Blue Slate
-    public static final Color TITLE_END = new Color(80, 120, 160); // Lighter Slate
+    public static final Color BORDER_COLOR = new Color(255, 255, 255, 40);
+    public static final Color TITLE_START = new Color(40, 50, 60);
+    public static final Color TITLE_END = new Color(20, 25, 30);
 
-    // Fonts - Segoe UI Focus
-    public static final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, 22);
+    // Fonts - Segoe UI + Ubuntu Style
+    public static final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, 24);
     public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 16);
-    public static final Font FONT_BODY = new Font("Segoe UI", Font.PLAIN, 13);
-    public static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, 11);
+    public static final Font FONT_BODY = new Font("Segoe UI", Font.PLAIN, 14);
+    public static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, 12);
     public static final Font FONT_RETRO_DIGITAL = new Font("Consolas", Font.BOLD, 14);
     
-    // Legacy mapping (kept for code compatibility, but mapped to Modern)
-    public static final Color WIN98_GREY = new Color(245, 245, 245); // Updated to Off-White
-    public static final Color SAGE_GREEN_DARK = PRIMARY_COLOR;
+    // Legacy mapping
+    public static final Color WIN98_GREY = new Color(46, 52, 54, 150);
+    public static final Color SAGE_GREEN_DARK = SECONDARY_COLOR;
     public static final Color WIN98_TITLE_ACTIVE_START = TITLE_START;
     public static final Color WIN98_TITLE_ACTIVE_END = TITLE_END;
-    public static final Color WIN98_TITLE_TEXT = Color.WHITE;
+    public static final Color WIN98_TITLE_TEXT = TEXT_PRIMARY;
     
-    public static final Color RETRO_BORDER_HIGHLIGHT = Color.WHITE;
-    public static final Color RETRO_BORDER_SHADOW = new Color(180, 180, 180);
-    public static final Color RETRO_BORDER_FACE = PANEL_BACKGROUND;
+    public static final Color RETRO_BORDER_HIGHLIGHT = new Color(255, 255, 255, 80);
+    public static final Color RETRO_BORDER_SHADOW = new Color(0, 0, 0, 150);
+    public static final Color RETRO_BORDER_FACE = new Color(255, 255, 255, 10);
 
     public static final Color GLASS_BG = AERO_GLASS;
     public static final Color GLASS_BACKGROUND = AERO_GLASS;
     public static final Color BACKGROUND_BASE = BACKGROUND_COLOR;
-    public static final Color GLASS_BORDER = new Color(255, 255, 255, 100);
-    public static final Color GLASS_HIGHLIGHT = new Color(255, 255, 255, 150);
-    public static final Color HUD_OVERLAY = new Color(0, 0, 0, 40);
+    public static final Color GLASS_BORDER = new Color(255, 255, 255, 60);
+    public static final Color GLASS_HIGHLIGHT = new Color(255, 255, 255, 100);
+    public static final Color HUD_OVERLAY = new Color(0, 0, 0, 100);
     
-    // Legacy Alias
-    public static final Color HIGHLIGHT_COLOR = PRIMARY_COLOR; // Green-ish
+    public static final Color HIGHLIGHT_COLOR = PRIMARY_COLOR; 
 }

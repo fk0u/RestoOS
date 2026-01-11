@@ -35,29 +35,13 @@ public class RetroButton extends JButton {
         int w = getWidth();
         int h = getHeight();
         
-        // Base Gradient (Vista-like)
-        Color top = new Color(245, 245, 245);
-        Color bot = new Color(200, 200, 200);
-        
-        if (getModel().isPressed()) {
-            top = new Color(180, 180, 180);
-            bot = new Color(220, 220, 220);
-        } else if (getModel().isRollover()) {
-            top = new Color(255, 255, 255);
-            bot = new Color(220, 235, 255); // Blue-ish hint
+        if (PlexUtils.PLEX_HEADER_TOP != null) {
+            PlexUtils.drawGlassButton(g2, w, h, getModel().isRollover(), getModel().isPressed());
+        } else {
+            // Fallback (shouldn't happen)
+            g2.setColor(Color.LIGHT_GRAY);
+            g2.fillRoundRect(0, 0, w, h, 8, 8);
         }
-        
-        GradientPaint gp = new GradientPaint(0, 0, top, 0, h, bot);
-        g2.setPaint(gp);
-        g2.fillRoundRect(0, 0, w-1, h-1, 8, 8);
-        
-        // Glass Shine (Top Half)
-        GradientPaint shine = new GradientPaint(0, 0, new Color(255, 255, 255, 180), 0, h/2, new Color(255, 255, 255, 50));
-        g2.setPaint(shine);
-        g2.fillRoundRect(0, 0, w-1, h/2, 8, 8);
-        
-        // Border
-        g2.setColor(new Color(120, 120, 120));
         g2.drawRoundRect(0, 0, w-1, h-1, 8, 8);
         
         super.paintComponent(g);

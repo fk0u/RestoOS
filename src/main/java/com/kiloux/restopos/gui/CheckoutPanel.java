@@ -157,6 +157,9 @@ public class CheckoutPanel extends JPanel {
         receiptArea = new JTextArea();
         receiptArea.setFont(new Font("Consolas", Font.PLAIN, 12));
         receiptArea.setEditable(false);
+        receiptArea.setBackground(new Color(40, 44, 52));
+        receiptArea.setForeground(Color.WHITE);
+        receiptArea.setCaretColor(Color.WHITE);
         receiptArea.setMargin(new Insets(10, 10, 10, 10));
         JScrollPane scroll = new JScrollPane(receiptArea);
         scroll.setBorder(null); // Flat look
@@ -203,10 +206,10 @@ public class CheckoutPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Slate/Blue Gradient Background for the Panel itself
+        // Uses global background from desktop if transparent, but let's add a subtle dark shade for legibility
         Graphics2D g2 = (Graphics2D) g;
-        GradientPaint gp = new GradientPaint(0, 0, new Color(40, 60, 80), 0, getHeight(), new Color(20, 30, 40));
-        g2.setPaint(gp);
+        // Dark Glass Tint
+        g2.setColor(new Color(0, 0, 0, 100));
         g2.fillRect(0, 0, getWidth(), getHeight());
     }
 
@@ -235,8 +238,15 @@ public class CheckoutPanel extends JPanel {
     private JTextField createTextField() {
         JTextField tf = new JTextField();
         tf.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tf.setBackground(new Color(255, 255, 255)); // Keep White for contrast on fields, or Dark?
+        // User said "Black on Black" is the problem.
+        // If I make it Dark, I MUST make text White.
+        // Let's go with Dark Theme standard: Dark Grey Field, White Text.
+        tf.setBackground(new Color(45, 50, 60)); 
+        tf.setForeground(Color.WHITE);
+        tf.setCaretColor(Color.WHITE);
         tf.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.GRAY),
+            BorderFactory.createLineBorder(new Color(100, 100, 100)),
             BorderFactory.createEmptyBorder(4, 4, 4, 4)));
         return tf;
     }
@@ -335,10 +345,12 @@ public class CheckoutPanel extends JPanel {
              try {
                  double v = Double.parseDouble(cashPaidField.getText());
                  if (v < cartService.getTotal()) {
+                     com.kiloux.restopos.utils.SoundManager.getInstance().play("error");
                      JOptionPane.showMessageDialog(this, "Insufficient Cash!", "Error", JOptionPane.WARNING_MESSAGE);
                      return;
                  }
              } catch(Exception e) {
+                 com.kiloux.restopos.utils.SoundManager.getInstance().play("error");
                  JOptionPane.showMessageDialog(this, "Invalid Cash Amount", "Error", JOptionPane.WARNING_MESSAGE);
                  return;
              }
@@ -353,10 +365,12 @@ public class CheckoutPanel extends JPanel {
         ord.setPaymentStatus("PAID");
         
         if (orderDAO.createOrder(ord, cartService.getItems()) != -1) {
+            com.kiloux.restopos.utils.SoundManager.getInstance().play("success");
             JOptionPane.showMessageDialog(this, "Transaction Successful!\nPrinting Receipt...", "Success", JOptionPane.INFORMATION_MESSAGE);
             cartService.clearCart();
             mainFrame.showCard("ONBOARDING"); 
         } else {
+            com.kiloux.restopos.utils.SoundManager.getInstance().play("error");
             JOptionPane.showMessageDialog(this, "Transaction Failed Db Error", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

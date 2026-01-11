@@ -31,6 +31,8 @@ public class AdminPanel extends JPanel {
     private JPanel dashboardPanel;
     private JPanel usersPanel;
     private JPanel menuPanel;
+    private JPanel ordersPanel;
+    private JPanel tablesPanel;
     private JPanel revPanel;
     
     public AdminPanel(MainFrame frame) {
@@ -40,11 +42,17 @@ public class AdminPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         // --- Header ---
-        JPanel header = new JPanel(new BorderLayout());
-        header.setOpaque(false);
+        JPanel header = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                com.kiloux.restopos.ui.PlexUtils.drawPlexHeader((Graphics2D)g, getWidth(), getHeight());
+            }
+        };
+        header.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        
         JLabel title = new JLabel("System Administration");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        title.setForeground(UIConfig.TEXT_PRIMARY); // Use Config White
         header.add(title, BorderLayout.WEST);
         
         RetroButton homeBtn = new RetroButton("Dashboard");
@@ -70,38 +78,50 @@ public class AdminPanel extends JPanel {
         createMenuView();
         contentPanel.add(menuPanel, "MENU");
         
-        // 4. Financials
+        // 4. Orders History
+        createOrdersView();
+        contentPanel.add(ordersPanel, "ORDERS");
+        
+        // 5. Tables Management
+        createTablesView();
+        contentPanel.add(tablesPanel, "TABLES");
+        
+        // 6. Financials
         createFinancialsView();
         contentPanel.add(revPanel, "FINANCE");
         
         add(contentPanel, BorderLayout.CENTER);
         
-        // --- Sidebar / Navigation (Left) ---
-        // Replacing footer with Sidebar for better UX? Or keeping footer buttons.
-        // User asked for "open all pages", so footer buttons must switch cards.
-        
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10)); // Changed to Center/Flow
+        // --- Footer Navigation ---
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         footer.setOpaque(false);
         
-        RetroButton usersBtn = new RetroButton("Manage Users");
+        RetroButton usersBtn = new RetroButton("Users");
         usersBtn.addActionListener(e -> contentLayout.show(contentPanel, "USERS"));
         
-        RetroButton menuBtn = new RetroButton("Manage Menu");
+        RetroButton menuBtn = new RetroButton("Menu");
         menuBtn.addActionListener(e -> contentLayout.show(contentPanel, "MENU"));
         
-        RetroButton finBtn = new RetroButton("Financials");
+        RetroButton ordersBtn = new RetroButton("Orders");
+        ordersBtn.addActionListener(e -> contentLayout.show(contentPanel, "ORDERS"));
+        
+        RetroButton tablesBtn = new RetroButton("Tables");
+        tablesBtn.addActionListener(e -> contentLayout.show(contentPanel, "TABLES"));
+        
+        RetroButton finBtn = new RetroButton("Finance");
         finBtn.addActionListener(e -> contentLayout.show(contentPanel, "FINANCE"));
         
         RetroButton logoutBtn = new RetroButton("Logout");
         logoutBtn.setForeground(Color.RED);
         logoutBtn.addActionListener(e -> {
-             // Quick logout logic
              com.kiloux.restopos.service.UserService.getInstance().logout();
              mainFrame.showCard("LOGIN");
         });
         
         footer.add(usersBtn);
         footer.add(menuBtn);
+        footer.add(ordersBtn);
+        footer.add(tablesBtn);
         footer.add(finBtn);
         footer.add(logoutBtn);
         add(footer, BorderLayout.SOUTH);
@@ -148,6 +168,7 @@ public class AdminPanel extends JPanel {
         String[] cols = {"ID", "Username", "Role"};
         DefaultTableModel model = new DefaultTableModel(cols, 0);
         JTable table = new JTable(model);
+        applyDarkTableStyle(table);
         
         Runnable refreshUsers = () -> {
             model.setRowCount(0);
@@ -199,6 +220,7 @@ public class AdminPanel extends JPanel {
         String[] cols = {"ID", "Name", "Price", "Category"};
         DefaultTableModel model = new DefaultTableModel(cols, 0);
         JTable table = new JTable(model);
+        applyDarkTableStyle(table);
         
         Runnable refreshMenu = () -> {
             model.setRowCount(0);
@@ -253,25 +275,172 @@ public class AdminPanel extends JPanel {
         menuPanel.add(acts, BorderLayout.SOUTH);
     }
     
+    private void createOrdersView() {
+        ordersPanel = createGlassPanel("Order History");
+        ordersPanel.setLayout(new BorderLayout(10, 10));
+        
+        String[] cols = {"ID", "Date", "Type", "Total", "Status", "Payment"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+        JTable table = new JTable(model);
+        applyDarkTableStyle(table);
+        
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.getViewport().setBackground(new Color(30, 30, 35));
+        ordersPanel.add(scroll, BorderLayout.CENTER);
+        
+        Runnable refreshOrders = () -> {
+            model.setRowCount(0);
+            try (Connection conn = DatabaseManager.getConnection();
+                 Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT * FROM orders ORDER BY created_at DESC LIMIT 100")) {
+                while(rs.next()) {
+                    model.addRow(new Object[]{
+                        rs.getInt("id"),
+                        rs.getTimestamp("created_at"),
+                        rs.getString("order_type"),
+                        "Rp " + df.format(rs.getDouble("total_amount")),
+                        rs.getString("status"),
+                        rs.getString("payment_status")
+                    });
+                }
+            } catch(Exception e) { e.printStackTrace(); }
+        };
+        refreshOrders.run();
+        
+
+        
+        JPanel acts = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        acts.setOpaque(false);
+        RetroButton refreshBtn = new RetroButton("Refresh");
+        refreshBtn.addActionListener(e -> refreshOrders.run());
+        acts.add(refreshBtn);
+        ordersPanel.add(acts, BorderLayout.SOUTH);
+    }
+    
+    private void createTablesView() {
+        tablesPanel = createGlassPanel("Table Management");
+        tablesPanel.setLayout(new BorderLayout(10, 10));
+        
+        String[] cols = {"ID", "Table #", "Capacity", "Status"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+        JTable table = new JTable(model);
+        applyDarkTableStyle(table);
+        
+        Runnable refreshTables = () -> {
+            model.setRowCount(0);
+            try (Connection conn = DatabaseManager.getConnection();
+                 Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT * FROM tables ORDER BY table_number")) {
+                while(rs.next()) {
+                    model.addRow(new Object[]{
+                        rs.getInt("id"),
+                        rs.getInt("table_number"),
+                        rs.getInt("capacity"),
+                        rs.getString("status")
+                    });
+                }
+            } catch(Exception e) { e.printStackTrace(); }
+        };
+        refreshTables.run();
+        
+        tablesPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+        
+        JPanel acts = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        acts.setOpaque(false);
+        
+        RetroButton addBtn = new RetroButton("Add Table");
+        addBtn.addActionListener(e -> {
+            JTextField num = new JTextField();
+            JTextField cap = new JTextField();
+            Object[] msg = {"Table Number:", num, "Capacity:", cap};
+            if (JOptionPane.showConfirmDialog(this, msg, "New Table", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+                try (Connection conn = DatabaseManager.getConnection(); 
+                     PreparedStatement ps = conn.prepareStatement("INSERT INTO tables (table_number, capacity) VALUES (?, ?)")) {
+                    ps.setInt(1, Integer.parseInt(num.getText()));
+                    ps.setInt(2, Integer.parseInt(cap.getText()));
+                    ps.executeUpdate();
+                    refreshTables.run();
+                } catch(Exception ex) { JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage()); }
+            }
+        });
+        
+        RetroButton delBtn = new RetroButton("Delete Table");
+        delBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row != -1) {
+                int id = (int) model.getValueAt(row, 0);
+                try (Connection conn = DatabaseManager.getConnection(); 
+                     PreparedStatement ps = conn.prepareStatement("DELETE FROM tables WHERE id=?")) {
+                    ps.setInt(1, id);
+                    ps.executeUpdate();
+                    refreshTables.run();
+                } catch(Exception ex) { ex.printStackTrace(); }
+            }
+        });
+        
+        RetroButton statusBtn = new RetroButton("Toggle Status");
+        statusBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row != -1) {
+                int id = (int) model.getValueAt(row, 0);
+                String curr = (String) model.getValueAt(row, 3);
+                String next = "AVAILABLE".equals(curr) ? "OCCUPIED" : "AVAILABLE";
+                try (Connection conn = DatabaseManager.getConnection(); 
+                     PreparedStatement ps = conn.prepareStatement("UPDATE tables SET status=? WHERE id=?")) {
+                    ps.setString(1, next);
+                    ps.setInt(2, id);
+                    ps.executeUpdate();
+                    refreshTables.run();
+                } catch(Exception ex) { ex.printStackTrace(); }
+            }
+        });
+        
+        acts.add(addBtn);
+        acts.add(delBtn);
+        acts.add(statusBtn);
+        tablesPanel.add(acts, BorderLayout.SOUTH);
+    }
+    
     private void createFinancialsView() {
         revPanel = createGlassPanel("Financial Reports");
         revPanel.setLayout(new BorderLayout(10, 10));
         
         JTextArea report = new JTextArea();
         report.setFont(new Font("Consolas", Font.PLAIN, 14));
+        report.setEditable(false);
+        // Fix Contrast
+        report.setBackground(new Color(40, 44, 52)); // Dark Grey
+        report.setForeground(Color.WHITE);
+        report.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // Query real data
+        double totalRevenue = 0;
+        int totalOrders = 0;
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement()) {
+            ResultSet rs = stmt.executeQuery("SELECT SUM(total_amount) as rev, COUNT(*) as cnt FROM orders WHERE payment_status='PAID'");
+            if (rs.next()) {
+                totalRevenue = rs.getDouble("rev");
+                totalOrders = rs.getInt("cnt");
+            }
+        } catch(Exception e) { e.printStackTrace(); }
+        
         report.setText("--- FINANCIAL REPORT ---\n\n" +
                        "Date: " + java.time.LocalDate.now() + "\n\n" +
-                       "Total Revenue (Gross): Rp 15,000,000\n" +
-                       "Total Expenses: Rp 8,000,000\n" +
-                       "Net Profit: Rp 7,000,000\n\n" + 
-                       "Projected Growth: +15%\n");
+                       "Total Revenue (Paid Orders): Rp " + df.format(totalRevenue) + "\n" +
+                       "Total Paid Orders: " + totalOrders + "\n" +
+                       "Avg. Order Value: Rp " + (totalOrders > 0 ? df.format(totalRevenue/totalOrders) : "0") + "\n");
         revPanel.add(new JScrollPane(report), BorderLayout.CENTER);
         
         JPanel kpis = new JPanel(new GridLayout(1, 3, 10, 0));
         kpis.setOpaque(false);
-        createGlassCard(kpis, "GROSS MARGIN", "46%");
-        createGlassCard(kpis, "OPEX", "Rp 8M");
-        createGlassCard(kpis, "NET INCOME", "Rp 7M");
+        createGlassCard(kpis, "REVENUE", "Rp " + df.format(totalRevenue/1000000) + "M");
+        createGlassCard(kpis, "ORDERS", String.valueOf(totalOrders));
+        createGlassCard(kpis, "AVG/ORDER", "Rp " + (totalOrders > 0 ? df.format(totalRevenue/totalOrders) : "0"));
         
         revPanel.add(kpis, BorderLayout.NORTH);
     }
@@ -385,5 +554,17 @@ public class AdminPanel extends JPanel {
         bar.setBorderPainted(false);
         row.add(bar, BorderLayout.CENTER);
         p.add(row);
+    }
+    private void applyDarkTableStyle(JTable table) {
+        table.setBackground(new Color(40, 44, 52));
+        table.setForeground(Color.WHITE);
+        table.setGridColor(new Color(80, 80, 80));
+        table.setSelectionBackground(UIConfig.PRIMARY_COLOR);
+        table.setSelectionForeground(Color.WHITE);
+        table.getTableHeader().setBackground(new Color(20, 25, 30));
+        table.getTableHeader().setForeground(Color.WHITE);
+        if (table.getParent() instanceof JViewport) {
+             ((JViewport)table.getParent()).setBackground(new Color(30, 30, 35));
+        }
     }
 }

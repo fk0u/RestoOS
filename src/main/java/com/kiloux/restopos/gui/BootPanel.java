@@ -6,69 +6,96 @@ import javax.swing.*;
 
 public class BootPanel extends JPanel {
 
-    private JTextArea term;
     private Timer timer;
-    private int step = 0;
+    private int progress = 0;
     private Runnable onComplete;
+    private float glow = 0f;
+    private boolean glowUp = true;
 
     public BootPanel(Runnable onComplete) {
         this.onComplete = onComplete;
+        setDoubleBuffered(true); // Smooth animation
         
-        setLayout(new BorderLayout());
-        setBackground(Color.BLACK);
+        // Trigger Sound
+        com.kiloux.restopos.utils.SoundManager.getInstance().play("startup");
         
-        term = new JTextArea();
-        term.setBackground(Color.BLACK);
-        term.setForeground(Color.WHITE);
-        term.setFont(new Font("Monospaced", Font.BOLD, 14));
-        term.setEditable(false);
-        term.setMargin(new Insets(20, 20, 20, 20));
-        add(term, BorderLayout.CENTER);
-        
-        // Boot Sequence Steps
-        timer = new Timer(600, e -> nextStep());
+        timer = new Timer(50, e -> update());
         timer.start();
+    }
+    
+    private void update() {
+        progress++;
         
-        print("KOU-BIOS (C) 1998 American Megatrends Inc.");
-        print("BIOS Date: 01/11/98 14:00:00 Ver: 1.0.0");
-        print("CPU: Pentium II 400MHz");
-    }
-    
-    private void print(String txt) {
-        term.append(txt + "\n");
-        term.setCaretPosition(term.getDocument().getLength());
-    }
-    
-    private void nextStep() {
-        step++;
-        switch(step) {
-            case 1: print("Checking Memory : 64MB OK"); break;
-            case 2: print("Detecting Primary Master ... KOU-HDD-20GB"); break;
-            case 3: print("Detecting Primary Slave  ... None"); break;
-            case 4: print("Detecting Secondary Master ... CD-ROM 24x"); break;
-            case 5: print(""); break;
-            case 6: print("Booting from Hard Disk..."); break;
-            case 7: 
-                term.setForeground(new Color(100, 200, 255)); // Longhorn Blue
-                print("Starting RestoOS Longhorn (Build 4074)..."); 
-                break;
-            case 9:
-                print("Loading Kernel (NT 6.0)...");
-                break;
-            case 11:
-                print("Initializing DWM (Desktop Window Manager)...");
-                break;
-            case 13:
-                print("Mounting /dev/sda1 (MySQL)... [OK]");
-                break;
-            case 15:
-                print("Starting Aero Glass Interface...");
-                break;
-            case 17:
-                timer.stop();
-                try { Thread.sleep(500); } catch(Exception e){}
-                onComplete.run();
-                break;
+        // Pulse Effect
+        if (glowUp) {
+            glow += 0.05f;
+            if (glow >= 1.0f) { glow = 1.0f; glowUp = false; }
+        } else {
+            glow -= 0.05f;
+            if (glow <= 0.0f) { glow = 0.0f; glowUp = true; }
         }
+        repaint();
+        
+        if (progress > 120) { // ~6 seconds
+            timer.stop();
+            onComplete.run();
+        }
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        int w = getWidth();
+        int h = getHeight();
+        
+        // 1. Animated Aurora Background
+        // Deep Black top, Aurora Green/Blue bottom
+        Color bottomColor = new Color(0, 50, (int)(50 + glow*20)); // Pulsing blue
+        GradientPaint gp = new GradientPaint(0, 0, Color.BLACK, 0, h, bottomColor);
+        g2.setPaint(gp);
+        g2.fillRect(0, 0, w, h);
+        
+        // 2. The "Energy Orb" / Flare
+        // Draw a light flare in the center moving
+        int flareX = (int)(w * (progress / 120.0));
+        RadialGradientPaint flare = new RadialGradientPaint(
+            new java.awt.geom.Point2D.Float(w/2, h/2),
+            w/2,
+            new float[]{0.0f, 1.0f},
+            new Color[]{new Color(0, 255, 255, (int)(glow*100)), new Color(0,0,0,0)}
+        );
+        g2.setPaint(flare);
+        g2.fillRect(0, 0, w, h);
+        
+        // 3. Logo Text
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Segoe UI", Font.PLAIN, 24));
+        String txt = "Starting Windows...";
+        FontMetrics fm = g2.getFontMetrics();
+        g2.drawString(txt, (w - fm.stringWidth(txt))/2, h/2);
+        
+        // 4. Copyright
+        g2.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        g2.setColor(Color.GRAY);
+        String copy = "© Microsoft Corporation (RestoOS Edition)";
+        fm = g2.getFontMetrics();
+        g2.drawString(copy, (w - fm.stringWidth(copy))/2, h - 50);
+        
+        // 5. Progress Bar area
+        int barW = 200;
+        int barH = 6;
+        int barX = (w - barW)/2;
+        int barY = h/2 + 40;
+        
+        g2.setColor(new Color(50, 50, 50));
+        g2.drawRoundRect(barX, barY, barW, barH, 6, 6);
+        
+        // Active Bar (Indeterminate style)
+        int fillW = (int)(barW * (progress/120.0));
+        g2.setColor(new Color(0, 200, 100)); // Vista Green
+        g2.fillRoundRect(barX, barY, fillW, barH, 6, 6);
     }
 }

@@ -51,13 +51,20 @@ public class CartPanel extends JPanel {
         cartTable.setFont(UIConfig.FONT_BODY);
         cartTable.setRowHeight(24);
         cartTable.setShowGrid(true);
-        cartTable.setGridColor(Color.LIGHT_GRAY);
+        // Dark Theme Table
+        cartTable.setBackground(new Color(40, 44, 52));
+        cartTable.setForeground(Color.WHITE);
+        cartTable.setGridColor(new Color(80, 80, 80));
+        cartTable.setSelectionBackground(UIConfig.PRIMARY_COLOR);
+        cartTable.setSelectionForeground(Color.WHITE);
+        cartTable.getTableHeader().setBackground(new Color(20, 25, 30));
+        cartTable.getTableHeader().setForeground(Color.WHITE);
         cartTable.getTableHeader().setReorderingAllowed(false);
         
         JScrollPane scroll = new JScrollPane(cartTable);
         // Win98 Inset Border for visual depth
         scroll.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-        scroll.getViewport().setBackground(Color.WHITE); 
+        scroll.getViewport().setBackground(new Color(30, 30, 35)); 
         
         add(scroll, BorderLayout.CENTER);
         

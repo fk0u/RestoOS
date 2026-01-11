@@ -1,65 +1,67 @@
-# Java Restaurant POS (Retro Edition)
+# RestoOS v17 (Aero-Gnome Edition)
 
-A Restaurant Point of Sale (POS) system built with Java Swing, featuring a unique **Retro PDA / Windows 98** aesthetic and a robust **MySQL** backend.
+A revolutionary Restaurant Operating System simulation built with **Java Swing**, featuring a premium **Aero Glass & Gnome** hybrid UI, simulated desktop environment, and advanced system tools.
 
-## 🌟 Features
+![RestoOS Banner](https://img.shields.io/badge/RestoOS-v17.0-blue?style=for-the-badge) ![Java](https://img.shields.io/badge/Java-17-orange?style=for-the-badge) ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=for-the-badge)
 
-### 🎨 Retro UI Design
-- **Windows 98 Style**: Custom components (Buttons, Panels, Title Bars) mimicking the classic OS.
-- **PDA Mode**: Optimized layout and colors (LCD Sage Green, CRT Black) for a nostalgic feel.
-- **Dynamic Cart**: Real-time shopping cart updates with tax calculation.
+## 🌟 New Features in v17
 
-### 🛠️ Core Functionality
-- **User Authentication**: Secure Login/Register for staff (Admin/Cashier roles).
-- **Table Management**: Select and manage occupied tables.
-- **Menu System**: Grid-based menu with categories (Food, Drink, Dessert).
-- **Order Processing**: 
-  - Add items with notes.
-  - Review cart totals (Subtotal + PPN 11%).
-  - Save orders to Database.
+### 🎨 Stunning Aero-Gnome UI
+- **Adwaita Dark Glass**: A dark, translucent theme inspired by Gnome and Windows Vista.
+- **Deep Space Aurora**: Dynamic, programmatic desktop wallpaper with vignette and energy curves.
+- **Plex Design System**: Custom glass headers, buttons, and panels ( `PlexUtils`).
+- **Unified Contrast**: Optimization for "Dark Mode" visibility (White Text / Dark Glass).
 
-### 🗄️ Database
-- **Engine**: MySQL 8.x
-- **Schema**: Auto-configured on first run.
-- **Support**: Handles `users`, `menu_items`, `orders`, and `tables`.
+### 🖥️ Desktop Experience
+- **Activities Menu**: A classic popup start menu launching system apps.
+- **Floating Dock**: Access common apps (Files, Settings) from the desktop.
+- **Window Management**: `JInternalFrame` based windowing for multitasking.
+
+### 🛠️ Advanced System Apps
+1.  **Terminal (`bash` simulation)**
+    -   Commands: `ls`, `cd`, `whoami`, `date`, `neofetch`.
+    -   Real file system navigation.
+2.  **Control Panel**
+    -   Central hub for System, User, and Network settings.
+    -   Classic categorized view.
+3.  **Files (Explorer)**
+    -   Navigate your actual hard drive.
+    -   Open text files in Notepad.
+4.  **Task Manager**
+    -   Monitor simulated CPU/Memory usage.
+    -   View running processes.
+
+### 🍽️ Core POS Functionality
+-   **Cashier Point of Sale**: Full cart, checkout, and receipt system.
+-   **Admin Dashboard**: Real-time Financial Reports, User Management, Table Map.
+-   **Database**: Auto-syncs with local MySQL `restopos` database.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Java JDK 17 or higher.
-- MySQL Server installed and running on `localhost:3306`.
-  - User: `root`
-  - Password: (Empty) or default. *Configure in `DatabaseConfig.java` if different.*
+-   **Java JDK 17+**
+-   **MySQL Server** (running on port 3306)
 
-### Installation
-1. Clone the repository.
-2. Ensure MySQL service is starting.
-3. Run the setup script to initialize dependencies (if needed).
+### Installation & Run
+1.  Double-click `run.bat` to launch the OS.
+2.  **Login**:
+    -   User: `admin`
+    -   Pass: `admin`
+3.  From the Desktop, click **"Activities"** (Top Left) to launch apps.
 
-### Data Initialization
-The application will **automatically create** the `restopos` database and seed initial data (Admin user, Default Menu) upon the first successful connection.
-
-### How to Run
-Double-click `run.bat` or execute in terminal:
-```powershell
-.\run.bat
+### Terminal Commands
+Try these in the new Terminal App:
+```bash
+guest@restoos:~$ help
+guest@restoos:~$ neofetch  # Show system info
+guest@restoos:~$ ls        # List files
 ```
 
-## 🔑 Default Credentials
-- **Username**: `admin`
-- **Password**: `admin`
-
-## 🛠️ Project Structure
-- `src/main/java/com/kiloux/restopos`: Source code.
-  - `gui`: UI Panels (Login, Menu, Cart, etc).
-  - `model`: Data entities.
-  - `dao`: Database Access Objects.
-  - `service`: Business logic (CartService, UserService).
-  - `config`: App configuration (DB, UI Constants).
-
-## 📝 Configuration
-- **Database**: Edit `src/main/java/com/kiloux/restopos/config/DatabaseConfig.java`.
-- **UI Theme**: Edit `src/main/java/com/kiloux/restopos/config/UIConfig.java`.
+## 📂 Project Structure
+-   `com.kiloux.restopos.apps`: System Applications (Terminal, ControlPanel, Settings).
+-   `com.kiloux.restopos.gui`: Core POS Panels (MainFrame, AdminPanel, Checkout).
+-   `com.kiloux.restopos.ui`: Custom UI Libraries (PlexUtils, RetroButton).
+-   `com.kiloux.restopos.utils`: Managers (Database, Sound).
 
 ---
-*Created by KOU | KILOUX*
+*Powered by Java Swing & Antipravity Engine*
