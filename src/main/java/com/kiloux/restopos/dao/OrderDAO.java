@@ -83,10 +83,7 @@ public class OrderDAO {
     
     // Logic: Count orders today + 1. Simple but enough for prototype.
     private int getNextQueueNumber(Connection conn) throws SQLException {
-        // In real SQL apps, maybe reset a sequence or query max(queue_number) where date(created_at) = date('now')
-        // SQLite: SELECT MAX(queue_number) FROM orders WHERE date(created_at) = date('now')
-        // Java handling of date might be safer
-        String sql = "SELECT MAX(queue_number) FROM orders WHERE created_at >= date('now')";
+        String sql = "SELECT MAX(queue_number) FROM orders WHERE DATE(created_at) = CURDATE()";
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {
@@ -110,7 +107,7 @@ public class OrderDAO {
 
     public List<Order> getPendingOrders() {
         List<Order> orders = new ArrayList<>();
-        String sql = "SELECT * FROM orders WHERE status IN ('WAITING', 'COOKING') ORDER BY created_at ASC";
+        String sql = "SELECT * FROM orders WHERE status IN ('PENDING', 'COOKING') ORDER BY created_at ASC";
         
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();

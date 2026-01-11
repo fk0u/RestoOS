@@ -3,17 +3,19 @@ package com.kiloux.restopos.config;
 import java.io.File;
 
 public class DatabaseConfig {
-    // Determine the database file path
-    // In production/jar, we would move this to user.home or app data folder.
-    // For this assignment's structure, we target the resources folder relative to working dir or use a designated folder
-    public static final String DB_FOLDER = "src/main/resources/database"; 
-    public static final String DB_NAME = "restaurant.db";
-    public static final String DB_URL = "jdbc:sqlite:" + DB_FOLDER + "/" + DB_NAME;
+    // MySQL Configuration
+    public static final String DB_HOST = "localhost";
+    public static final String DB_PORT = "3306";
+    public static final String DB_NAME = "restopos";
+    public static final String DB_USER = "root";
+    public static final String DB_PASS = ""; // Empty by default for local dev
+    
+    // JDBC URL construction
+    public static final String DB_SERVER_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
+    public static final String DB_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
 
+    // Fallback or setup checks
     public static void ensureDbDirectoryExists() {
-        File dir = new File(DB_FOLDER);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        // Not needed for MySQL generally, but good for logs if we had file logging
     }
 }

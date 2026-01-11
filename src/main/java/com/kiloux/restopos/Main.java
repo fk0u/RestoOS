@@ -4,15 +4,20 @@ import com.kiloux.restopos.gui.MainFrame;
 import com.kiloux.restopos.utils.DatabaseManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import com.formdev.flatlaf.FlatLightLaf;
 
 public class Main {
     public static void main(String[] args) {
         // Initialize Database First
         DatabaseManager.initializeDatabase();
 
-        // Setup Look and Feel (System default usually best for basic Swing if not using FlatLaf)
+        // Setup Look and Feel (FlatLaf Light for Retro Theme base)
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            FlatLightLaf.setup();
+            UIManager.put("Panel.background", new java.awt.Color(0xD4E1CC));
+            UIManager.put("OptionPane.background", new java.awt.Color(0xD4E1CC));
+            UIManager.put("Button.arc", 0); // No rounded corners for default buttons
+            UIManager.put("Component.arc", 0);
         } catch (Exception e) {
             e.printStackTrace();
         }

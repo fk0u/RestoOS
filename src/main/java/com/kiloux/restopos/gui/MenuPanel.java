@@ -5,13 +5,8 @@ import com.kiloux.restopos.config.UIConfig;
 import com.kiloux.restopos.dao.MenuItemDAO;
 import com.kiloux.restopos.gui.dialog.ItemDetailDialog;
 import com.kiloux.restopos.model.MenuItem;
-import com.kiloux.restopos.ui.AnimatedButton;
-import com.kiloux.restopos.ui.GlassPanel;
-import com.kiloux.restopos.ui.KineticScrollPane;
-import com.kiloux.restopos.ui.Toast;
+import com.kiloux.restopos.ui.RetroMenuItem;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import javax.swing.*;
@@ -23,7 +18,7 @@ public class MenuPanel extends JPanel {
     private DeviceOrientation orientation;
 
     private JPanel gridContainer;
-    private KineticScrollPane scroll;
+    private JScrollPane scroll; // Standard JScrollPane for Retro feel (no kinetic)
     
     // Pagination
     private List<MenuItem> allItems;
@@ -39,48 +34,52 @@ public class MenuPanel extends JPanel {
         this.allItems = menuDAO.getAllMenuItems();
         
         setLayout(new BorderLayout());
-        setOpaque(false);
+        setBackground(UIConfig.BACKGROUND_COLOR);
         
         // --- Header Section ---
         JPanel topContainer = new JPanel(new BorderLayout());
-        topContainer.setOpaque(false);
+        topContainer.setOpaque(true);
+        topContainer.setBackground(UIConfig.BACKGROUND_COLOR);
         
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
-        JLabel title = new JLabel("Menu Kami", JLabel.CENTER);
+        header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel title = new JLabel("MENU KAMI", JLabel.CENTER);
         title.setFont(UIConfig.FONT_HEADER);
         title.setForeground(UIConfig.TEXT_PRIMARY);
         header.add(title, BorderLayout.CENTER);
         
-        // Search & Filter
+        // Search & Filter (Retro Style)
         JPanel filterPanel = new JPanel();
         filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
         filterPanel.setOpaque(false);
         filterPanel.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 15));
         
-        GlassPanel searchBg = new GlassPanel(new BorderLayout());
-        searchBg.setBorderRadius(20);
-        searchBg.setPreferredSize(new Dimension(200, 40));
-        JTextField searchField = new JTextField("Cari menu...");
-        searchField.setOpaque(false);
-        searchField.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 5));
-        searchField.setForeground(Color.WHITE);
-        searchField.setCaretColor(Color.WHITE);
-        searchBg.add(searchField, BorderLayout.CENTER);
+        // Search Box (Squared)
+        JPanel searchBox = new JPanel(new BorderLayout());
+        searchBox.setBorder(BorderFactory.createLineBorder(UIConfig.BORDER_COLOR));
+        searchBox.setBackground(Color.WHITE);
+        searchBox.setPreferredSize(new Dimension(200, 30));
         
-        filterPanel.add(searchBg);
+        JTextField searchField = new JTextField("CARI MENU...");
+        searchField.setBorder(null);
+        searchField.setFont(UIConfig.FONT_BODY);
+        searchBox.add(searchField, BorderLayout.CENTER);
+        
+        filterPanel.add(searchBox);
         filterPanel.add(Box.createVerticalStrut(10));
 
-        JPanel chips = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        // Chips (Retro Buttons)
+        JPanel chips = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         chips.setOpaque(false);
-        String[] categories = {"All", "Chicken", "Ramen", "Bevs"};
+        String[] categories = {"ALL", "CHICKEN", "RAMEN", "BEVS"};
         for (String cat : categories) {
             JButton chip = new JButton(cat);
+            chip.setFont(UIConfig.FONT_SMALL);
+            chip.setBackground(UIConfig.SECONDARY_COLOR);
+            chip.setForeground(UIConfig.TEXT_PRIMARY);
             chip.setFocusPainted(false);
-            chip.setBackground(new Color(255, 255, 255, 30));
-            chip.setForeground(Color.WHITE);
-            chip.setBorder(BorderFactory.createLineBorder(new Color(255, 255, 255, 50), 1));
-            chip.setContentAreaFilled(false);
             chips.add(chip);
         }
         filterPanel.add(chips);
@@ -91,28 +90,29 @@ public class MenuPanel extends JPanel {
 
         // --- Grid Section ---
         gridContainer = new JPanel();
-        gridContainer.setOpaque(false);
-        gridContainer.setBorder(BorderFactory.createEmptyBorder(10, 10, 120, 10)); // Bottom padding for footer
+        gridContainer.setOpaque(true);
+        gridContainer.setBackground(UIConfig.BACKGROUND_COLOR);
+        gridContainer.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
         
-        scroll = new KineticScrollPane(gridContainer);
+        scroll = new JScrollPane(gridContainer);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.getViewport().setBackground(UIConfig.BACKGROUND_COLOR);
         add(scroll, BorderLayout.CENTER);
-        
-        // applyGridLayout(); // Moved to end of constructor
         
         // --- Footer Section (Pagination + Cart) ---
         JPanel footer = new JPanel(new BorderLayout());
-        footer.setOpaque(false);
-        footer.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        footer.setOpaque(true);
+        footer.setBackground(UIConfig.BACKGROUND_COLOR);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UIConfig.BORDER_COLOR));
         
         // Pagination Controls
-        JPanel pagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        JPanel pagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         pagePanel.setOpaque(false);
         
-        prevBtn = createNavBtn("<");
-        nextBtn = createNavBtn(">");
-        pageLabel = new JLabel("Page 1");
-        pageLabel.setForeground(Color.WHITE);
-        pageLabel.setFont(UIConfig.FONT_BODY);
+        prevBtn = new JButton("<");
+        nextBtn = new JButton(">");
+        pageLabel = new JLabel("PAGE 1");
+        pageLabel.setFont(UIConfig.FONT_RETRO_DIGITAL);
         
         prevBtn.addActionListener(e -> {
             if (currentPage > 0) {
@@ -135,41 +135,56 @@ public class MenuPanel extends JPanel {
         
         footer.add(pagePanel, BorderLayout.WEST);
         
-        AnimatedButton cartBtn = new AnimatedButton("🛒 Cart", UIConfig.ACCENT_COLOR, UIConfig.ACCENT_COLOR);
-        cartBtn.startPulse();
+        JButton cartBtn = new JButton("CART [0] - Rp 0");
+        cartBtn.setFont(UIConfig.FONT_BODY);
+        cartBtn.setBackground(UIConfig.PRIMARY_COLOR);
+        cartBtn.setForeground(Color.WHITE);
         cartBtn.addActionListener(e -> mainFrame.showCard("CART"));
         footer.add(cartBtn, BorderLayout.EAST);
+        
+        // Real-time Update
+        com.kiloux.restopos.service.CartService.getInstance().addListener(() -> {
+            int count = com.kiloux.restopos.service.CartService.getInstance().getItems().stream().mapToInt(com.kiloux.restopos.model.CartItem::getQuantity).sum();
+            double total = com.kiloux.restopos.service.CartService.getInstance().getTotal();
+            cartBtn.setText(String.format("CART [%d] - Rp %,.0f", count, total));
+        });
         
         add(footer, BorderLayout.SOUTH);
         
         applyGridLayout();
         updatePaginationState();
     }
-    
-    private JButton createNavBtn(String text) {
-        JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(40, 40));
-        btn.setBackground(new Color(255, 255, 255, 50));
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
-        btn.setContentAreaFilled(false);
-        return btn;
-    }
 
     private void applyGridLayout() {
         gridContainer.removeAll();
-        // 2 Cols for Portrait, 4 for Landscape
-        int cols = (orientation == DeviceOrientation.PORTRAIT) ? 2 : 4;
-        gridContainer.setLayout(new GridLayout(0, cols, 10, 10));
+        // 4 Columns Fixed (As per user request)
+        gridContainer.setLayout(new GridLayout(0, 4, 10, 10)); // 4 Cols
         
         // Pagination Logic
         int start = currentPage * ITEMS_PER_PAGE;
         int end = Math.min(start + ITEMS_PER_PAGE, allItems.size());
         
         List<MenuItem> pageItems = allItems.subList(start, end);
+        int index = start + 1;
+        
         for (MenuItem item : pageItems) {
-            gridContainer.add(createMenuItemCard(item));
+            final int currIndex = index++;
+            RetroMenuItem card = new RetroMenuItem(
+                currIndex, 
+                item.getName().toUpperCase(), 
+                String.format("Rp %.0f", item.getPrice()), 
+                loadImageFor(item),
+                () -> new ItemDetailDialog(mainFrame, item).setVisible(true)
+            );
+            gridContainer.add(card);
+        }
+        
+        // Fill empty slots to maintain grid structure (optional, but looks better in retro grid)
+        int remainder = ITEMS_PER_PAGE - pageItems.size();
+        for(int i=0; i<remainder; i++) {
+             JPanel placeholder = new JPanel();
+             placeholder.setOpaque(false);
+             gridContainer.add(placeholder);
         }
         
         updatePaginationState();
@@ -177,39 +192,8 @@ public class MenuPanel extends JPanel {
         gridContainer.repaint();
     }
     
-    private void updatePaginationState() {
-        int maxPage = (int) Math.ceil((double)allItems.size() / ITEMS_PER_PAGE) - 1;
-        if (maxPage < 0) maxPage = 0;
-        
-        pageLabel.setText("Page " + (currentPage + 1) + " / " + (maxPage + 1));
-        prevBtn.setEnabled(currentPage > 0);
-        nextBtn.setEnabled(currentPage < maxPage);
-    }
-    
-    public void applyOrientation(DeviceOrientation newOrientation) {
-        this.orientation = newOrientation;
-        applyGridLayout(); // Re-flow grid
-    }
-    
-    private JPanel createMenuItemCard(MenuItem item) {
-        GlassPanel card = new GlassPanel(new BorderLayout());
-        card.setBorderRadius(20);
-        card.setPreferredSize(new Dimension(180, 240));
-        
-        // Make whole card clickable
-        card.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                new ItemDetailDialog(mainFrame, item).setVisible(true);
-            }
-        });
-        
-        // Image Layer
-        JLabel imgLabel = new JLabel();
-        imgLabel.setPreferredSize(new Dimension(180, 140));
-        imgLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        try {
+    private Image loadImageFor(MenuItem item) {
+       try {
             String path = "/images/" + (item.getImagePath() != null ? item.getImagePath() : "default.jpg");
             java.net.URL imgUrl = getClass().getResource(path);
              if (imgUrl == null) {
@@ -220,53 +204,27 @@ public class MenuPanel extends JPanel {
             if (imgUrl != null) {
                 BufferedImage bi = javax.imageio.ImageIO.read(imgUrl);
                 if (bi != null) {
-                    Image img = bi.getScaledInstance(180, 140, Image.SCALE_SMOOTH);
-                    imgLabel.setIcon(new ImageIcon(img));
+                    return bi.getScaledInstance(64, 64, Image.SCALE_SMOOTH);
                 }
-            } else {
-                 throw new Exception("No image");
-            }
+            } 
         } catch (Exception e) {
-            // Fallback Avatar
-            imgLabel.setText(item.getName().substring(0, 1));
-            imgLabel.setFont(new Font("Segoe UI", Font.BOLD, 40));
-            imgLabel.setForeground(Color.WHITE);
-            imgLabel.setOpaque(true);
-            imgLabel.setBackground(new Color(
-                Math.abs(item.getName().hashCode() * 12345) % 255,
-                Math.abs(item.getName().hashCode() * 67890) % 255, 
-                Math.abs(item.getName().hashCode() * 54321) % 255).darker());
+            // Null returns default placeholder in RetroMenuItem
         }
+        return null; // RetroMenuItem handles null with isometric box
+    }
+    
+    private void updatePaginationState() {
+        int maxPage = (int) Math.ceil((double)allItems.size() / ITEMS_PER_PAGE) - 1;
+        if (maxPage < 0) maxPage = 0;
         
-        card.add(imgLabel, BorderLayout.NORTH);
-        
-        // Info Layer
-        JPanel info = new JPanel(new BorderLayout());
-        info.setOpaque(false);
-        info.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
-        
-        JPanel textPanel = new JPanel(new GridLayout(2, 1));
-        textPanel.setOpaque(false);
-        JLabel nameLbl = new JLabel(item.getName());
-        nameLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        nameLbl.setForeground(Color.WHITE);
-        JLabel priceLbl = new JLabel(String.format("Rp %.0f", item.getPrice()));
-        priceLbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        priceLbl.setForeground(UIConfig.ACCENT_COLOR);
-        textPanel.add(nameLbl);
-        textPanel.add(priceLbl);
-        
-        AnimatedButton addBtn = new AnimatedButton("+", UIConfig.PRIMARY_COLOR, UIConfig.SECONDARY_COLOR);
-        addBtn.setPreferredSize(new Dimension(32, 32));
-        addBtn.addActionListener(e -> {
-             // Open Detail Dialog even on + button for consistent "Industrial" flow (Note taking)
-             new ItemDetailDialog(mainFrame, item).setVisible(true);
-        });
-        
-        info.add(textPanel, BorderLayout.CENTER);
-        info.add(addBtn, BorderLayout.EAST);
-        
-        card.add(info, BorderLayout.SOUTH);
-        return card;
+        pageLabel.setText("PAGE " + (currentPage + 1) + " / " + (maxPage + 1));
+        prevBtn.setEnabled(currentPage > 0);
+        nextBtn.setEnabled(currentPage < maxPage);
+    }
+    
+    public void applyOrientation(DeviceOrientation newOrientation) {
+        this.orientation = newOrientation;
+        // Grid is fixed 4 columns per user spec ("Grid (4 kolom)"), so orientation might just change container size
+        revalidate();
     }
 }
