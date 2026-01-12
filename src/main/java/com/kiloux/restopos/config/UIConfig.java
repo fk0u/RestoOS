@@ -4,13 +4,16 @@ import java.awt.Color;
 import java.awt.Font;
 
 public class UIConfig {
+    // UI Scaling - Increase this to make everything larger
+    public static final float UI_SCALE = 2.5f; // 1.0 = normal, 1.5 = 150%, 2.0 = 200%, 2.5 = 250%
+    
     // Retro PDA Dimensions (Optional usage, keeping legacy consts)
     public static final int WINDOW_WIDTH = 428;
     public static final int WINDOW_HEIGHT = 926;
 
     // Layout
-    public static final int SAFE_PADDING = 10;
-    public static final int SAFE_PADDING_LANDSCAPE = 10;
+    public static final int SAFE_PADDING = (int)(25 * UI_SCALE);
+    public static final int SAFE_PADDING_LANDSCAPE = (int)(25 * UI_SCALE);
 
     // --- AERO-GNOME HYBRID THEME (PREMIUM DARK) ---
     
@@ -45,12 +48,12 @@ public class UIConfig {
     public static final Color TITLE_START = new Color(40, 50, 60);
     public static final Color TITLE_END = new Color(20, 25, 30);
 
-    // Fonts - Segoe UI + Ubuntu Style
-    public static final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, 24);
-    public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 16);
-    public static final Font FONT_BODY = new Font("Segoe UI", Font.PLAIN, 14);
-    public static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, 12);
-    public static final Font FONT_RETRO_DIGITAL = new Font("Consolas", Font.BOLD, 14);
+    // Fonts - Segoe UI + Ubuntu Style (Scaled)
+    public static final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, (int)(24 * UI_SCALE));
+    public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, (int)(16 * UI_SCALE));
+    public static final Font FONT_BODY = new Font("Segoe UI", Font.PLAIN, (int)(14 * UI_SCALE));
+    public static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, (int)(12 * UI_SCALE));
+    public static final Font FONT_RETRO_DIGITAL = new Font("Consolas", Font.BOLD, (int)(14 * UI_SCALE));
     
     // Legacy mapping
     public static final Color WIN98_GREY = new Color(46, 52, 54, 150);

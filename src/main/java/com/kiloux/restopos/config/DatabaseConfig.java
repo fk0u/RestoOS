@@ -7,8 +7,8 @@ public class DatabaseConfig {
     public static final String DB_HOST = "localhost";
     public static final String DB_PORT = "3306";
     public static final String DB_NAME = "restopos";
-    public static final String DB_USER = "root";
-    public static final String DB_PASS = ""; // Empty by default for local dev
+    public static final String DB_USER = "restopos";
+    public static final String DB_PASS = "restopos123"; // Password untuk local dev
     
     // JDBC URL construction
     public static final String DB_SERVER_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
