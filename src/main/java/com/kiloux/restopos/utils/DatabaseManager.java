@@ -120,16 +120,14 @@ public class DatabaseManager {
     }
     
     private static void seedUsers(Statement stmt) throws SQLException {
-        if (stmt.executeQuery("SELECT count(*) FROM users").next()) {
-             // Basic check logic, robust check:
-             java.sql.ResultSet rs = stmt.executeQuery("SELECT count(*) FROM users");
-             rs.next();
-             if (rs.getInt(1) == 0) {
-                 System.out.println("Seeding default users...");
-                 stmt.execute("INSERT INTO users (username, password, role) VALUES ('admin', 'admin', 'ADMIN')");
-                 stmt.execute("INSERT INTO users (username, password, role) VALUES ('kasir', 'kasir', 'CASHIER')");
-                 stmt.execute("INSERT INTO users (username, password, role) VALUES ('client', 'client', 'CLIENT')");
-             }
+        try (java.sql.ResultSet rs = stmt.executeQuery("SELECT count(*) FROM users")) {
+            rs.next();
+            if (rs.getInt(1) == 0) {
+                System.out.println("Seeding default users...");
+                stmt.execute("INSERT INTO users (username, password, role) VALUES ('admin', 'admin', 'ADMIN')");
+                stmt.execute("INSERT INTO users (username, password, role) VALUES ('kasir', 'kasir', 'CASHIER')");
+                stmt.execute("INSERT INTO users (username, password, role) VALUES ('client', 'client', 'CLIENT')");
+            }
         }
     }
 

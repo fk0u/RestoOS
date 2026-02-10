@@ -120,8 +120,7 @@ public class OrderDAO {
                 o.setStatus(rs.getString("status"));
                 o.setQueueNumber(rs.getInt("queue_number"));
                 o.setCustomerName(rs.getString("customer_name"));
-                // Timestamp logic simplified
-                o.setCreatedAt(LocalDateTime.now()); // Parse if needed, but relative time calc needs logic
+                o.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 
                 // Fetch Items
                 o.setItems(getOrderItems(conn, o.getId()));

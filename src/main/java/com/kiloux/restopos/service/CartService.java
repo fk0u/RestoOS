@@ -35,12 +35,7 @@ public class CartService {
     }
 
     public void addItemWithNotes(MenuItem item, int qty, String notes) {
-        // Check if item with same ID AND same notes exists? 
-        // For simplicity, we treat different notes as different line items?
-        // Or just append. For this prototype, separate lines if notes differ is better, 
-        // but current equals logic might rely on Item ID.
-        // Let's simple add new item if notes differ, or update qty if same.
-        
+        // Merge qty if same item+notes, otherwise add new line item
         for (CartItem cartItem : items) {
             if (cartItem.getMenuItem().getId() == item.getId() && cartItem.getNotes().equals(notes)) {
                 cartItem.setQuantity(cartItem.getQuantity() + qty);
@@ -56,6 +51,7 @@ public class CartService {
 
     public void removeItem(MenuItem item) {
         items.removeIf(i -> i.getMenuItem().getId() == item.getId());
+        notifyListeners();
     }
     
     public void updateQuantity(MenuItem item, int qty) {
@@ -66,6 +62,7 @@ public class CartService {
          for (CartItem cartItem : items) {
             if (cartItem.getMenuItem().getId() == item.getId()) {
                 cartItem.setQuantity(qty);
+                notifyListeners();
                 return;
             }
         }
@@ -75,6 +72,7 @@ public class CartService {
     
     public void clear() {
         items.clear();
+        notifyListeners();
     }
 
     public void clearCart() {

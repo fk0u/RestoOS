@@ -127,8 +127,12 @@ public class TablePanel extends JPanel {
         btn.setContentAreaFilled(false);
         
         btn.addActionListener(e -> {
-            if (!isOccupied) mainFrame.showCard("MENU");
-            else JOptionPane.showMessageDialog(this, "Meja sedang dipakai!", "Info", JOptionPane.WARNING_MESSAGE);
+            if (!isOccupied) {
+                com.kiloux.restopos.service.CartService.getInstance().setSelectedTableId(t.getId());
+                mainFrame.showCard("MENU");
+            } else {
+                JOptionPane.showMessageDialog(this, "Meja sedang dipakai!", "Info", JOptionPane.WARNING_MESSAGE);
+            }
         });
         
         return btn;

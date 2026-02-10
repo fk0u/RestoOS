@@ -17,22 +17,50 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 public class CheckoutPanel extends JPanel {
+    
+    // Variables declaration - do not modify
+    private javax.swing.JPanel headerPanel;
+    private javax.swing.JLabel titleLabel;
+    private javax.swing.JPanel contentPanel;
+    private javax.swing.JPanel inputPanel;
+    private javax.swing.JPanel custForm;
+    private javax.swing.JLabel lblCustName;
+    private javax.swing.JTextField customerNameField;
+    private javax.swing.JLabel lblOrderType;
+    private javax.swing.JComboBox<String> typeBox;
+    private javax.swing.JPanel advancedBox;
+    private com.kiloux.restopos.ui.RetroButton btnSplitBill;
+    private com.kiloux.restopos.ui.RetroButton btnVoucher;
+    private com.kiloux.restopos.ui.RetroButton btnMember;
+    private com.kiloux.restopos.ui.RetroButton btnNote;
+    private javax.swing.JTabbedPane paymentTabs;
+    private javax.swing.JPanel cashPanel;
+    private javax.swing.JLabel lblTotalDue;
+    private javax.swing.JLabel totalLabel;
+    private javax.swing.JLabel lblCashPaid;
+    private javax.swing.JTextField cashPaidField;
+    private javax.swing.JLabel lblChange;
+    private javax.swing.JLabel changeLabel;
+    private javax.swing.JPanel nonCashPanel;
+    private javax.swing.JLabel lblMethod;
+    private javax.swing.JComboBox<String> methodBox;
+    private javax.swing.JLabel lblRef;
+    private javax.swing.JTextField refNumberField;
+    private javax.swing.JPanel previewPanel;
+    private javax.swing.JPanel optsPanel;
+    private javax.swing.JRadioButton p58mm;
+    private javax.swing.JRadioButton p80mm;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JScrollPane scrollReceipt;
+    private javax.swing.JTextArea receiptArea;
+    private javax.swing.JPanel actionPanel;
+    private com.kiloux.restopos.ui.RetroButton btnCancel;
+    private com.kiloux.restopos.ui.RetroButton btnConfirm;
+    // End of variables declaration
 
     private MainFrame mainFrame;
     private CartService cartService;
     private OrderDAO orderDAO;
-    
-    // UI Elements
-    private JTextArea receiptArea;
-    private JTextField customerNameField;
-    private JRadioButton p58mm, p80mm;
-    
-    // Payment Elements
-    private JTabbedPane paymentTabs;
-    private JTextField cashPaidField;
-    private JLabel changeLabel;
-    private JTextField refNumberField;
-    
     private DecimalFormat df = new DecimalFormat("#,###");
 
     public CheckoutPanel(MainFrame frame) {
@@ -40,159 +68,256 @@ public class CheckoutPanel extends JPanel {
         this.cartService = CartService.getInstance();
         this.orderDAO = new OrderDAO();
         
-        setLayout(new BorderLayout(15, 15));
-        setOpaque(false); // Transparent for background gradient
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        initComponents();
         
-        // --- Header ---
-        JPanel header = new JPanel(new BorderLayout());
-        header.setOpaque(false);
-        JLabel title = new JLabel("Checkout Counter");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        title.setForeground(Color.WHITE);
-        header.add(title, BorderLayout.WEST);
-        add(header, BorderLayout.NORTH);
-        
-        // --- Main Content ---
-        JPanel content = new JPanel(new GridLayout(1, 2, 20, 0));
-        content.setOpaque(false);
-        
-        // --- LEFT: Interaction (Glass Panel) ---
-        JPanel inputPanel = createGlassPanel("Transaction Details");
-        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
-        
-        // Customer Info
-        JPanel custForm = new JPanel(new GridLayout(2, 2, 8, 8));
-        custForm.setOpaque(false);
-        custForm.add(createLabel("Customer Name:"));
-        customerNameField = createTextField();
-        custForm.add(customerNameField);
-        custForm.add(createLabel("Order Type:"));
-        JComboBox<String> typeBox = new JComboBox<>(new String[]{"Dine In", "Take Away", "Delivery"});
-        typeBox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        custForm.add(typeBox);
-        inputPanel.add(custForm);
-        inputPanel.add(Box.createVerticalStrut(15));
-        
-        // Advanced Actions Grid
-        JPanel advancedBox = new JPanel(new GridLayout(2, 2, 8, 8));
-        advancedBox.setOpaque(false);
-        advancedBox.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Advanced Actions", TitledBorder.LEFT, TitledBorder.TOP, new Font("Segoe UI", Font.BOLD, 12), Color.WHITE));
-        
-        RetroButton splitBillBtn = new RetroButton("Split Bill");
-        splitBillBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Split Bill Feature (Mock)"));
-        advancedBox.add(splitBillBtn);
-        
-        RetroButton voucherBtn = new RetroButton("Apply Voucher");
-        voucherBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Voucher Applied: DISC10 (Mock)"));
-        advancedBox.add(voucherBtn);
-        
-        RetroButton memberBtn = new RetroButton("Member Lookup");
-        memberBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Member Found: Gold Tier (Mock)"));
-        advancedBox.add(memberBtn);
-        
-        RetroButton noteBtn = new RetroButton("Add Note");
-        noteBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Kitchen Note Added."));
-        advancedBox.add(noteBtn);
-        
-        inputPanel.add(advancedBox);
-        inputPanel.add(Box.createVerticalStrut(15));
-        
-        // Payment Tabs
-        paymentTabs = new JTabbedPane();
-        paymentTabs.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        
-        // Cash Tab
-        JPanel cashPanel = new JPanel(new GridLayout(4, 2, 5, 5));
-        cashPanel.setOpaque(false);
-        cashPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        JLabel totalLabel = new JLabel("Rp 0");
-        totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        totalLabel.setForeground(Color.WHITE); // Make sure this updates
-        
-        cashPanel.add(createLabel("Total Due:"));
-        cashPanel.add(totalLabel);
-        cashPanel.add(createLabel("Cash Received:"));
-        cashPaidField = createTextField();
-        cashPanel.add(cashPaidField);
-        cashPanel.add(createLabel("Change:"));
-        changeLabel = new JLabel("Rp 0");
-        changeLabel.setFont(new Font("Segoe UI", Font.BOLD, 16)); 
-        changeLabel.setForeground(UIConfig.PRIMARY_COLOR);
-        cashPanel.add(changeLabel);
-        
-        paymentTabs.addTab("CASH", cashPanel);
-        
-        // Non-Cash
-        JPanel nonCashPanel = new JPanel(new GridLayout(4, 2, 5, 5));
-        nonCashPanel.setOpaque(false);
-        nonCashPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        nonCashPanel.add(createLabel("Method:"));
-        nonCashPanel.add(new JComboBox<>(new String[]{"QRIS", "Debit BCA", "Credit Card"}));
-        nonCashPanel.add(createLabel("Ref Number:"));
-        refNumberField = createTextField();
-        nonCashPanel.add(refNumberField);
-        paymentTabs.addTab("NON-CASH", nonCashPanel);
-        
-        inputPanel.add(paymentTabs);
-        
-        content.add(inputPanel);
-        
-        // --- RIGHT: Receipt Preview (Glass Panel) ---
-        JPanel previewPanel = createGlassPanel("Live Receipt Preview");
-        previewPanel.setLayout(new BorderLayout());
-        
-        JPanel opts = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        opts.setOpaque(false);
-        ButtonGroup bg = new ButtonGroup();
-        p58mm = new JRadioButton("58mm", true); p58mm.setOpaque(false); p58mm.setForeground(Color.WHITE); p58mm.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        p80mm = new JRadioButton("80mm"); p80mm.setOpaque(false); p80mm.setForeground(Color.WHITE); p80mm.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        bg.add(p58mm); bg.add(p80mm);
-        ActionListener refreshAl = e -> generateReceiptPreview();
-        p58mm.addActionListener(refreshAl); p80mm.addActionListener(refreshAl);
-        opts.add(createLabel("Paper Size: ")); opts.add(p58mm); opts.add(p80mm);
-        previewPanel.add(opts, BorderLayout.NORTH);
-        
-        receiptArea = new JTextArea();
-        receiptArea.setFont(new Font("Consolas", Font.PLAIN, 12));
-        receiptArea.setEditable(false);
-        receiptArea.setBackground(new Color(40, 44, 52));
-        receiptArea.setForeground(Color.WHITE);
-        receiptArea.setCaretColor(Color.WHITE);
-        receiptArea.setMargin(new Insets(10, 10, 10, 10));
-        JScrollPane scroll = new JScrollPane(receiptArea);
-        scroll.setBorder(null); // Flat look
-        previewPanel.add(scroll, BorderLayout.CENTER);
-        
-        content.add(previewPanel);
-        add(content, BorderLayout.CENTER);
-        
-        // --- Footer Buttons ---
-        JPanel charBar = new JPanel(new GridLayout(1, 2, 20, 0));
-        charBar.setOpaque(false);
-        charBar.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
-        
-        RetroButton cancelBtn = new RetroButton("CANCEL TRANSACTION");
-        cancelBtn.setForeground(new Color(200, 50, 50));
-        cancelBtn.addActionListener(e -> mainFrame.showCard("CART"));
-        
-        RetroButton payBtn = new RetroButton("CONFIRM & PRINT");
-        payBtn.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        payBtn.setForeground(new Color(0, 100, 0));
-        payBtn.addActionListener(e -> processOrder(typeBox.getSelectedItem().toString()));
-        
-        charBar.add(cancelBtn);
-        charBar.add(payBtn);
-        add(charBar, BorderLayout.SOUTH);
+        initCustom();
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
+    private void initComponents() {
 
-        // Listeners & Init
+        buttonGroup1 = new javax.swing.ButtonGroup();
+        headerPanel = new javax.swing.JPanel();
+        titleLabel = new javax.swing.JLabel();
+        contentPanel = new javax.swing.JPanel();
+        inputPanel = new javax.swing.JPanel();
+        custForm = new javax.swing.JPanel();
+        lblCustName = new javax.swing.JLabel();
+        customerNameField = new javax.swing.JTextField();
+        lblOrderType = new javax.swing.JLabel();
+        typeBox = new javax.swing.JComboBox<>();
+        advancedBox = new javax.swing.JPanel();
+        btnSplitBill = new com.kiloux.restopos.ui.RetroButton("Split Bill");
+        btnVoucher = new com.kiloux.restopos.ui.RetroButton("Apply Voucher");
+        btnMember = new com.kiloux.restopos.ui.RetroButton("Member Lookup");
+        btnNote = new com.kiloux.restopos.ui.RetroButton("Add Note");
+        paymentTabs = new javax.swing.JTabbedPane();
+        cashPanel = new javax.swing.JPanel();
+        lblTotalDue = new javax.swing.JLabel();
+        totalLabel = new javax.swing.JLabel();
+        lblCashPaid = new javax.swing.JLabel();
+        cashPaidField = new javax.swing.JTextField();
+        lblChange = new javax.swing.JLabel();
+        changeLabel = new javax.swing.JLabel();
+        nonCashPanel = new javax.swing.JPanel();
+        lblMethod = new javax.swing.JLabel();
+        methodBox = new javax.swing.JComboBox<>();
+        lblRef = new javax.swing.JLabel();
+        refNumberField = new javax.swing.JTextField();
+        previewPanel = new javax.swing.JPanel();
+        optsPanel = new javax.swing.JPanel();
+        p58mm = new javax.swing.JRadioButton();
+        p80mm = new javax.swing.JRadioButton();
+        scrollReceipt = new javax.swing.JScrollPane();
+        receiptArea = new javax.swing.JTextArea();
+        actionPanel = new javax.swing.JPanel();
+        btnCancel = new com.kiloux.restopos.ui.RetroButton("Cancel");
+        btnConfirm = new com.kiloux.restopos.ui.RetroButton("Confirm Payment");
+
+        setOpaque(false);
+        setLayout(new java.awt.BorderLayout(15, 15));
+        setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        headerPanel.setOpaque(false);
+        headerPanel.setLayout(new java.awt.BorderLayout());
+
+        titleLabel.setFont(new java.awt.Font("Segoe UI", 1, 28)); // NOI18N
+        titleLabel.setForeground(java.awt.Color.WHITE);
+        titleLabel.setText("Checkout Counter");
+        headerPanel.add(titleLabel, java.awt.BorderLayout.WEST);
+
+        add(headerPanel, java.awt.BorderLayout.NORTH);
+
+        contentPanel.setOpaque(false);
+        contentPanel.setLayout(new java.awt.GridLayout(1, 2, 20, 0));
+
+        // Glass Panel imitation
+        inputPanel.setBackground(new java.awt.Color(255, 255, 255, 30));
+        inputPanel.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255, 100)), 
+            javax.swing.BorderFactory.createTitledBorder(null, "Transaction Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 14), java.awt.Color.WHITE)));
+        inputPanel.setLayout(new javax.swing.BoxLayout(inputPanel, javax.swing.BoxLayout.Y_AXIS));
+
+        custForm.setOpaque(false);
+        custForm.setLayout(new java.awt.GridLayout(2, 2, 8, 8));
+
+        lblCustName.setForeground(java.awt.Color.WHITE);
+        lblCustName.setText("Customer Name:");
+        custForm.add(lblCustName);
+
+        customerNameField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        customerNameField.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(100, 100, 150)), javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        custForm.add(customerNameField);
+
+        lblOrderType.setForeground(java.awt.Color.WHITE);
+        lblOrderType.setText("Order Type:");
+        custForm.add(lblOrderType);
+
+        typeBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Dine In", "Take Away", "Delivery" }));
+        custForm.add(typeBox);
+
+        inputPanel.add(custForm);
+
+        inputPanel.add(javax.swing.Box.createVerticalStrut(15)); // Spacer
+
+        advancedBox.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Advanced Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12), java.awt.Color.WHITE));
+        advancedBox.setOpaque(false);
+        advancedBox.setLayout(new java.awt.GridLayout(2, 2, 8, 8));
+
+        btnSplitBill.setText("Split Bill");
+        btnSplitBill.addActionListener(e -> JOptionPane.showMessageDialog(this, "Split Bill Feature (Mock)"));
+        advancedBox.add(btnSplitBill);
+
+        btnVoucher.setText("Apply Voucher");
+        btnVoucher.addActionListener(e -> JOptionPane.showMessageDialog(this, "Voucher Applied: DISC10 (Mock)"));
+        advancedBox.add(btnVoucher);
+
+        btnMember.setText("Member Lookup");
+        btnMember.addActionListener(e -> JOptionPane.showMessageDialog(this, "Member Found: Gold Tier (Mock)"));
+        advancedBox.add(btnMember);
+
+        btnNote.setText("Add Note");
+        btnNote.addActionListener(e -> JOptionPane.showMessageDialog(this, "Kitchen Note Added."));
+        advancedBox.add(btnNote);
+
+        inputPanel.add(advancedBox);
+        
+        inputPanel.add(javax.swing.Box.createVerticalStrut(15)); // Spacer
+
+        paymentTabs.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+
+        cashPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        cashPanel.setOpaque(false);
+        cashPanel.setLayout(new java.awt.GridLayout(4, 2, 5, 5));
+
+        lblTotalDue.setForeground(java.awt.Color.WHITE);
+        lblTotalDue.setText("Total Due:");
+        cashPanel.add(lblTotalDue);
+
+        totalLabel.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        totalLabel.setForeground(java.awt.Color.WHITE);
+        totalLabel.setText("Rp 0");
+        cashPanel.add(totalLabel);
+
+        lblCashPaid.setForeground(java.awt.Color.WHITE);
+        lblCashPaid.setText("Cash Received:");
+        cashPanel.add(lblCashPaid);
+
+        cashPaidField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        cashPaidField.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(100, 100, 150)), javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        cashPanel.add(cashPaidField);
+
+        lblChange.setForeground(java.awt.Color.WHITE);
+        lblChange.setText("Change:");
+        cashPanel.add(lblChange);
+
+        changeLabel.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        changeLabel.setForeground(UIConfig.PRIMARY_COLOR);
+        changeLabel.setText("Rp 0");
+        cashPanel.add(changeLabel);
+
+        paymentTabs.addTab("CASH", cashPanel);
+
+        nonCashPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        nonCashPanel.setOpaque(false);
+        nonCashPanel.setLayout(new java.awt.GridLayout(4, 2, 5, 5));
+
+        lblMethod.setForeground(java.awt.Color.WHITE);
+        lblMethod.setText("Method:");
+        nonCashPanel.add(lblMethod);
+
+        methodBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "QRIS", "Debit BCA", "Credit Card" }));
+        nonCashPanel.add(methodBox);
+
+        lblRef.setForeground(java.awt.Color.WHITE);
+        lblRef.setText("Ref Number:");
+        nonCashPanel.add(lblRef);
+
+        refNumberField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        refNumberField.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(100, 100, 150)), javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        nonCashPanel.add(refNumberField);
+
+        paymentTabs.addTab("NON-CASH", nonCashPanel);
+
+        inputPanel.add(paymentTabs);
+
+        contentPanel.add(inputPanel);
+
+        previewPanel.setBackground(new java.awt.Color(255, 255, 255, 30));
+        previewPanel.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255, 100)), 
+            javax.swing.BorderFactory.createTitledBorder(null, "Live Receipt Preview", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 14), java.awt.Color.WHITE)));
+        previewPanel.setLayout(new java.awt.BorderLayout());
+
+        optsPanel.setOpaque(false);
+        optsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        buttonGroup1.add(p58mm);
+        p58mm.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        p58mm.setForeground(java.awt.Color.WHITE);
+        p58mm.setSelected(true);
+        p58mm.setText("58mm");
+        p58mm.setOpaque(false);
+        optsPanel.add(p58mm);
+
+        buttonGroup1.add(p80mm);
+        p80mm.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        p80mm.setForeground(java.awt.Color.WHITE);
+        p80mm.setText("80mm");
+        p80mm.setOpaque(false);
+        optsPanel.add(p80mm);
+
+        previewPanel.add(optsPanel, java.awt.BorderLayout.NORTH);
+
+        receiptArea.setEditable(false);
+        receiptArea.setBackground(new java.awt.Color(245, 245, 240)); // Paper color
+        receiptArea.setColumns(20);
+        receiptArea.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
+        receiptArea.setForeground(java.awt.Color.BLACK);
+        receiptArea.setRows(5);
+        receiptArea.setMargin(new java.awt.Insets(10, 10, 10, 10));
+        scrollReceipt.setViewportView(receiptArea);
+
+        previewPanel.add(scrollReceipt, java.awt.BorderLayout.CENTER);
+
+        actionPanel.setOpaque(false);
+        actionPanel.setLayout(new java.awt.GridLayout(1, 2, 10, 0));
+
+        btnCancel.setText("Cancel");
+        // addAction handled in initCustom or here
+        actionPanel.add(btnCancel);
+
+        btnConfirm.setText("CONFIRM PAYMENT");
+        btnConfirm.setBackground(UIConfig.SUCCESS_COLOR);
+        btnConfirm.setForeground(java.awt.Color.WHITE);
+        actionPanel.add(btnConfirm);
+
+        previewPanel.add(actionPanel, java.awt.BorderLayout.SOUTH);
+
+        contentPanel.add(previewPanel);
+
+        add(contentPanel, java.awt.BorderLayout.CENTER);
+    }// </editor-fold>                        
+
+    private void initCustom() {
+        // Logic listeners
+        btnCancel.addActionListener(e -> mainFrame.showCard("CART"));
+        
         cashPaidField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { calcChange(); }
-            public void removeUpdate(DocumentEvent e) { calcChange(); }
-            public void changedUpdate(DocumentEvent e) { calcChange(); }
+            public void insertUpdate(DocumentEvent e) { updateChange(); }
+            public void removeUpdate(DocumentEvent e) { updateChange(); }
+            public void changedUpdate(DocumentEvent e) { updateChange(); }
         });
         
+        btnConfirm.addActionListener(e -> processOrder(typeBox.getSelectedItem().toString()));
+        
+        // Add Ancestor Listener to refresh when shown
         addAncestorListener(new javax.swing.event.AncestorListener() {
             public void ancestorAdded(javax.swing.event.AncestorEvent event) { 
                 generateReceiptPreview(); 
@@ -201,72 +326,33 @@ public class CheckoutPanel extends JPanel {
             public void ancestorRemoved(javax.swing.event.AncestorEvent event) {}
             public void ancestorMoved(javax.swing.event.AncestorEvent event) {}
         });
+
+        // Initial generation
+        generateReceiptPreview();
+        totalLabel.setText("Rp " + df.format(cartService.getTotal()));
     }
+
+    private void updateChange() {
+        try {
+            double total = cartService.getTotal();
+            double paid = Double.parseDouble(cashPaidField.getText());
+            double change = paid - total;
+            changeLabel.setText("Rp " + df.format(change));
+            if (change < 0) changeLabel.setForeground(Color.RED);
+            else changeLabel.setForeground(Color.GREEN);
+        } catch (NumberFormatException e) {
+            changeLabel.setText("Rp -");
+        }
+    }
+    
+
     
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Uses global background from desktop if transparent, but let's add a subtle dark shade for legibility
         Graphics2D g2 = (Graphics2D) g;
-        // Dark Glass Tint
         g2.setColor(new Color(0, 0, 0, 100));
         g2.fillRect(0, 0, getWidth(), getHeight());
-    }
-
-    private JPanel createGlassPanel(String title) {
-        JPanel p = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(255, 255, 255, 30));
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-            }
-        };
-        p.setOpaque(false);
-        p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10), title, TitledBorder.LEFT, TitledBorder.TOP,  new Font("Segoe UI", Font.BOLD, 14), Color.WHITE));
-        return p;
-    }
-    
-    private JLabel createLabel(String text) {
-        JLabel l = new JLabel(text);
-        l.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        l.setForeground(Color.WHITE);
-        return l;
-    }
-    
-    private JTextField createTextField() {
-        JTextField tf = new JTextField();
-        tf.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tf.setBackground(new Color(255, 255, 255)); // Keep White for contrast on fields, or Dark?
-        // User said "Black on Black" is the problem.
-        // If I make it Dark, I MUST make text White.
-        // Let's go with Dark Theme standard: Dark Grey Field, White Text.
-        tf.setBackground(new Color(45, 50, 60)); 
-        tf.setForeground(Color.WHITE);
-        tf.setCaretColor(Color.WHITE);
-        tf.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(100, 100, 100)),
-            BorderFactory.createEmptyBorder(4, 4, 4, 4)));
-        return tf;
-    }
-
-    private JPanel createSectionPanel(String title) {
-        return createGlassPanel(title);
-    }
-
-    // ... calcChange, generateReceiptPreview, etc. (Keep Logic) ...
-    private void calcChange() {
-        try {
-            double paid = Double.parseDouble(cashPaidField.getText());
-            double total = cartService.getTotal();
-            double change = paid - total;
-            changeLabel.setText("Rp " + df.format(change));
-            if (change < 0) changeLabel.setForeground(new Color(255, 100, 100)); // Light Red
-            else changeLabel.setForeground(new Color(100, 255, 100)); // Light Green
-        } catch (NumberFormatException e) {
-            changeLabel.setText("Rp 0");
-        }
     }
     
     private void generateReceiptPreview() {

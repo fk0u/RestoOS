@@ -30,9 +30,11 @@ public class ShutdownPanel extends JPanel {
                 if (alpha >= 1.0f) {
                     alpha = 1.0f;
                     timer.stop();
-                    // Black Screen wait
-                    try { Thread.sleep(1000); } catch(Exception ex){}
-                    System.exit(0);
+                    // Delay exit without blocking EDT
+                    new Timer(1000, evt -> {
+                        ((Timer)evt.getSource()).stop();
+                        System.exit(0);
+                    }).start();
                 }
             }
             repaint();

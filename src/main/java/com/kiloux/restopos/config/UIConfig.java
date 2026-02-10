@@ -4,71 +4,52 @@ import java.awt.Color;
 import java.awt.Font;
 
 public class UIConfig {
-    // Retro PDA Dimensions (Optional usage, keeping legacy consts)
+    // Legacy fallback size (runtime uses fullscreen sizing)
     public static final int WINDOW_WIDTH = 428;
     public static final int WINDOW_HEIGHT = 926;
 
     // Layout
-    public static final int SAFE_PADDING = 10;
-    public static final int SAFE_PADDING_LANDSCAPE = 10;
+    public static final int SAFE_PADDING = 24;
+    public static final int SAFE_PADDING_LANDSCAPE = 16;
 
-    // --- AERO-GNOME HYBRID THEME (PREMIUM DARK) ---
+    // Colors
+    public static final Color PRIMARY_COLOR = new Color(0x34D399); // Emeral 400 (Brighter for dark mode)
+    public static final Color SECONDARY_COLOR = new Color(0x2DD4BF); // Teal 400
+    public static final Color ACCENT_COLOR = new Color(0xF472B6); // Pink 400
+    public static final Color WARNING_COLOR = new Color(0xFBBF24); // Amber 400
+    public static final Color DANGER_COLOR = new Color(0xF87171); // Red 400
+    public static final Color SUCCESS_COLOR = new Color(0x22C55E); // Green 500
     
-    // Desktop - Deep Aurora
-    public static final Color BACKGROUND_COLOR = new Color(10, 15, 20); // Deep Space
-    public static final Color VISTA_AURORA_DARK = new Color(5, 10, 15);
-    public static final Color VISTA_AURORA_LIGHT = new Color(25, 45, 65);
+    public static final Color BACKGROUND_COLOR = new Color(15, 23, 42); // Fallback dark
+    public static final Color BACKGROUND_GRADIENT_START = new Color(2, 6, 23); // slate 950
+    public static final Color BACKGROUND_GRADIENT_END = new Color(15, 23, 42);   // slate 900
+    public static final Color HUD_OVERLAY = new Color(255, 255, 255, 10);
     
-    // Panels - Glassy Dark (Adwaita/Aero mix)
-    public static final Color PANEL_BACKGROUND = new Color(30, 30, 35, 200);
-
-    // Glass - Premium
-    public static final Color AERO_GLASS = new Color(20, 25, 30, 180); // Dark Smokey Glass
-    public static final Color AERO_TASKBAR = new Color(10, 10, 10, 220); // Almost Black
-    public static final Color AERO_START_MENU = new Color(25, 25, 30, 240); 
+    // Glassmorphism (Dark Mode)
+    public static final Color GLASS_BG = new Color(30, 41, 59, 200); // Slate 800 transparent
+    public static final Color GLASS_BORDER = new Color(148, 163, 184, 50); // Slate 400 transparent
+    public static final Color GLASS_HIGHLIGHT = new Color(255, 255, 255, 20);
+    public static final Color GLASS_BACKGROUND = new Color(30, 41, 59, 180); // Glass background for panels
     
-    // Accents - Ubuntu/Vista Hybrid
-    public static final Color PRIMARY_COLOR = new Color(52, 101, 164); // Gnome Blue
-    public static final Color SECONDARY_COLOR = new Color(115, 210, 22); // Chameleon Green
-    public static final Color ACCENT_COLOR = new Color(245, 121, 0); // Ubuntu Orange
+    // Border & Highlight Colors
+    public static final Color BORDER_COLOR = new Color(148, 163, 184); // Slate 400
+    public static final Color HIGHLIGHT_COLOR = new Color(255, 255, 255, 30); // White semi-transparent
     
-    public static final Color DANGER_COLOR = new Color(204, 0, 0); // Gnome Red
-    public static final Color WARNING_COLOR = new Color(237, 212, 0); // Gnome Yellow
-
-    // Text - ClearType White
-    public static final Color TEXT_PRIMARY = new Color(238, 238, 236); // Off-White
-    public static final Color TEXT_SECONDARY = new Color(186, 189, 182); // Light Grey
-    public static final Color TEXT_DARK = new Color(20, 20, 20); 
+    // Vista Aero Theme Colors
+    public static final Color VISTA_AURORA_DARK = new Color(20, 30, 50, 230); // Dark aurora gradient
+    public static final Color VISTA_AURORA_LIGHT = new Color(50, 80, 120, 180); // Light aurora gradient
+    public static final Color AERO_TASKBAR = new Color(30, 40, 60, 200); // Aero glass taskbar effect
     
-    // Borders & Gradients
-    public static final Color BORDER_COLOR = new Color(255, 255, 255, 40);
-    public static final Color TITLE_START = new Color(40, 50, 60);
-    public static final Color TITLE_END = new Color(20, 25, 30);
-
-    // Fonts - Segoe UI + Ubuntu Style
+    // Windows 98 Retro Theme Colors
+    public static final Color WIN98_GREY = new Color(192, 192, 192); // Classic Win98 grey
+    public static final Color WIN98_TITLE_ACTIVE_START = new Color(0, 0, 128); // Win98 active title bar start
+    
+    // Fonts (Light text)
+    public static final Color TEXT_PRIMARY = new Color(241, 245, 249); // Slate 100
+    public static final Color TEXT_SECONDARY = new Color(148, 163, 184); // Slate 400
     public static final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, 24);
-    public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 16);
+    public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 18);
     public static final Font FONT_BODY = new Font("Segoe UI", Font.PLAIN, 14);
     public static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, 12);
-    public static final Font FONT_RETRO_DIGITAL = new Font("Consolas", Font.BOLD, 14);
-    
-    // Legacy mapping
-    public static final Color WIN98_GREY = new Color(46, 52, 54, 150);
-    public static final Color SAGE_GREEN_DARK = SECONDARY_COLOR;
-    public static final Color WIN98_TITLE_ACTIVE_START = TITLE_START;
-    public static final Color WIN98_TITLE_ACTIVE_END = TITLE_END;
-    public static final Color WIN98_TITLE_TEXT = TEXT_PRIMARY;
-    
-    public static final Color RETRO_BORDER_HIGHLIGHT = new Color(255, 255, 255, 80);
-    public static final Color RETRO_BORDER_SHADOW = new Color(0, 0, 0, 150);
-    public static final Color RETRO_BORDER_FACE = new Color(255, 255, 255, 10);
-
-    public static final Color GLASS_BG = AERO_GLASS;
-    public static final Color GLASS_BACKGROUND = AERO_GLASS;
-    public static final Color BACKGROUND_BASE = BACKGROUND_COLOR;
-    public static final Color GLASS_BORDER = new Color(255, 255, 255, 60);
-    public static final Color GLASS_HIGHLIGHT = new Color(255, 255, 255, 100);
-    public static final Color HUD_OVERLAY = new Color(0, 0, 0, 100);
-    
-    public static final Color HIGHLIGHT_COLOR = PRIMARY_COLOR; 
+    public static final Font FONT_RETRO_DIGITAL = new Font("Courier New", Font.BOLD, 14); // Retro digital display font
 }
