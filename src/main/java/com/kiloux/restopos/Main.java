@@ -9,7 +9,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 public class Main {
     public static void main(String[] args) {
         // Enable UI Scaling for High DPI displays
-        System.setProperty("sun.java2d.uiScale", "2.5");
+        System.setProperty("sun.java2d.uiScale", "1.5");
         
         // Initialize Database First
         DatabaseManager.initializeDatabase();

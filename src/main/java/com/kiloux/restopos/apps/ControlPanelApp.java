@@ -1,6 +1,7 @@
 package com.kiloux.restopos.apps;
 
 import com.kiloux.restopos.config.UIConfig;
+import com.kiloux.restopos.gui.MainFrame;
 import com.kiloux.restopos.ui.PlexUtils;
 import java.awt.*;
 import java.awt.event.*;
@@ -44,14 +45,20 @@ public class ControlPanelApp extends JInternalFrame {
         }));
         
         grid.add(createIcon("User Accounts", "Change account type", e -> {
-             SettingsApp s = new SettingsApp();
+               MainFrame owner = null;
+               java.awt.Container top = desktop.getTopLevelAncestor();
+               if (top instanceof MainFrame) owner = (MainFrame) top;
+               SettingsApp s = new SettingsApp(owner);
              s.setVisible(true);
              desktop.add(s);
              try { s.setSelected(true); } catch(Exception ex){}
         }));
         
         grid.add(createIcon("Appearance", "Display, Personalization", e -> {
-             SettingsApp s = new SettingsApp();
+               MainFrame owner = null;
+               java.awt.Container top = desktop.getTopLevelAncestor();
+               if (top instanceof MainFrame) owner = (MainFrame) top;
+               SettingsApp s = new SettingsApp(owner);
              s.setVisible(true);
              desktop.add(s);
         }));

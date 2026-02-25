@@ -136,6 +136,16 @@ public class KitchenPanel extends JPanel {
         cust.setForeground(Color.WHITE);
         cust.setFont(new Font("Monospaced", Font.PLAIN, 12));
         body.add(cust);
+        
+        // Show Global/Order Note
+        if (order.getNotes() != null && !order.getNotes().trim().isEmpty()) {
+            JLabel gNote = new JLabel("Global Note: " + order.getNotes());
+            gNote.setForeground(Color.ORANGE);
+            gNote.setFont(new Font("Monospaced", Font.BOLD, 12));
+            gNote.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+            body.add(gNote);
+        }
+        
         body.add(new JSeparator());
         
         if (order.getItems() != null) {

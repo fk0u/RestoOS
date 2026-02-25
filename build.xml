@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="restopos" default="run" basedir=".">
+    <description>RestoOS build with Apache Ant (without Maven)</description>
+
+    <property name="src.dir" value="src/main/java"/>
+    <property name="resources.dir" value="src/main/resources"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="lib.dir" value="lib/ext"/>
+    <property name="main.class" value="com.kiloux.restopos.Main"/>
+    <property name="jdk.release" value="17"/>
+
+    <path id="project.classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+    </target>
+
+    <target name="resolve-deps" depends="init" description="Download external jars to lib/ext">
+        <get src="https://repo1.maven.org/maven2/com/formdev/flatlaf/3.4/flatlaf-3.4.jar" dest="${lib.dir}/flatlaf-3.4.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/com/google/zxing/core/3.5.3/core-3.5.3.jar" dest="${lib.dir}/zxing-core-3.5.3.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/com/google/zxing/javase/3.5.3/javase-3.5.3.jar" dest="${lib.dir}/zxing-javase-3.5.3.jar" skipexisting="true"/>
+
+        <get src="https://repo1.maven.org/maven2/com/itextpdf/commons/7.2.5/commons-7.2.5.jar" dest="${lib.dir}/itext-commons-7.2.5.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/com/itextpdf/io/7.2.5/io-7.2.5.jar" dest="${lib.dir}/itext-io-7.2.5.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/com/itextpdf/kernel/7.2.5/kernel-7.2.5.jar" dest="${lib.dir}/itext-kernel-7.2.5.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/com/itextpdf/layout/7.2.5/layout-7.2.5.jar" dest="${lib.dir}/itext-layout-7.2.5.jar" skipexisting="true"/>
+
+        <get src="https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.2.0/mysql-connector-j-8.2.0.jar" dest="${lib.dir}/mysql-connector-j-8.2.0.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.46.0.0/sqlite-jdbc-3.46.0.0.jar" dest="${lib.dir}/sqlite-jdbc-3.46.0.0.jar" skipexisting="true"/>
+
+        <get src="https://repo1.maven.org/maven2/org/jfree/jfreechart/1.5.3/jfreechart-1.5.3.jar" dest="${lib.dir}/jfreechart-1.5.3.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.7/slf4j-api-2.0.7.jar" dest="${lib.dir}/slf4j-api-2.0.7.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/2.0.7/slf4j-simple-2.0.7.jar" dest="${lib.dir}/slf4j-simple-2.0.7.jar" skipexisting="true"/>
+        <get src="https://repo1.maven.org/maven2/javazoom/jlayer/1.0.1/jlayer-1.0.1.jar" dest="${lib.dir}/jlayer-1.0.1.jar" skipexisting="true"/>
+    </target>
+
+    <target name="clean" description="Clean build outputs">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile" depends="resolve-deps" description="Compile Java sources">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" encoding="UTF-8" source="${jdk.release}" target="${jdk.release}" includeantruntime="false" debug="true">
+            <classpath refid="project.classpath"/>
+        </javac>
+    </target>
+
+    <target name="copy-resources" depends="compile" description="Copy resources to classes directory">
+        <copy todir="${classes.dir}" overwrite="true">
+            <fileset dir="${resources.dir}"/>
+        </copy>
+    </target>
+
+    <target name="jar" depends="copy-resources" description="Create application jar">
+        <jar destfile="${dist.dir}/restopos-ant.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="copy-resources" description="Run app with Ant">
+        <java classname="${main.class}" fork="true" failonerror="true">
+            <classpath>
+                <pathelement path="${classes.dir}"/>
+                <path refid="project.classpath"/>
+            </classpath>
+        </java>
+    </target>
+</project>

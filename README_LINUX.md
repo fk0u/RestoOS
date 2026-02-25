@@ -26,6 +26,12 @@ cd /home/kou/Public/Project/RestoOS
 ./run.sh
 ```
 
+#### Opsi 3: Langsung pakai Ant
+```bash
+ant clean copy-resources
+ant run
+```
+
 ### Catatan Penting:
 
 **Jika ada error terkait `libpthread` atau snap:**
@@ -71,5 +77,6 @@ sudo mysql -e "ALTER USER 'restopos'@'localhost' IDENTIFIED BY 'restopos123'; FL
 - `run.sh` - Script untuk build dan run
 - `start.sh` - Alternative launcher (clean environment)
 - `src/main/java/com/kiloux/restopos/config/DatabaseConfig.java` - Konfigurasi database
+- `build.xml` - Konfigurasi build project menggunakan Ant
 
 Selamat menggunakan RestoOS! 🍽️

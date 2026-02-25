@@ -165,7 +165,8 @@ public class CustomerMonitorPanel extends JPanel {
             q.append("'").append(statuses[i]).append("'");
             if(i < statuses.length-1) q.append(",");
         }
-        q.append(") AND date(created_at) = CURDATE() ORDER BY id DESC LIMIT 12");
+        // SQLite Fix: date('now')
+        q.append(") AND date(created_at) = date('now', 'localtime') ORDER BY id DESC LIMIT 12");
         
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();

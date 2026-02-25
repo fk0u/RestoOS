@@ -296,9 +296,15 @@ public class AdminPanel extends JPanel {
                  Statement stmt = conn.createStatement();
                  ResultSet rs = stmt.executeQuery("SELECT * FROM orders ORDER BY created_at DESC LIMIT 100")) {
                 while(rs.next()) {
+                    Object dateObj;
+                    try {
+                        dateObj = rs.getTimestamp("created_at");
+                    } catch (Exception ex) {
+                        dateObj = rs.getString("created_at");
+                    }
                     model.addRow(new Object[]{
                         rs.getInt("id"),
-                        rs.getTimestamp("created_at"),
+                        dateObj,
                         rs.getString("order_type"),
                         "Rp " + df.format(rs.getDouble("total_amount")),
                         rs.getString("status"),

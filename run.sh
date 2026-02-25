@@ -7,27 +7,22 @@ unset LD_LIBRARY_PATH
 unset LD_PRELOAD
 
 MVN_BIN="apache-maven-3.9.6/bin"
+ANT_BIN="apache-ant-1.10.14/bin"
 
-echo "Checking for Maven..."
-if [ ! -d "$MVN_BIN" ]; then
-    echo "Maven not found in $MVN_BIN. Installing Maven..."
-    
-    # Check if Maven is installed globally
-    if command -v mvn &> /dev/null; then
-        echo "Using system Maven..."
-        MVN_CMD="mvn"
-    else
-        echo "Maven not found. Please install Maven first:"
-        echo "  sudo apt update"
-        echo "  sudo apt install maven"
-        exit 1
-    fi
+echo "Checking for Ant..."
+if [ -d "$ANT_BIN" ]; then
+    ANT_CMD="$ANT_BIN/ant"
+elif command -v ant &> /dev/null; then
+    ANT_CMD="ant"
 else
-    MVN_CMD="$MVN_BIN/mvn"
+    echo "Ant not found. Please install Ant first:"
+    echo "  sudo apt update"
+    echo "  sudo apt install ant"
+    exit 1
 fi
 
 echo "Building Project..."
-$MVN_CMD clean package -DskipTests
+$ANT_CMD clean copy-resources
 
 if [ $? -ne 0 ]; then
     echo "Build Failed!"
@@ -35,4 +30,4 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Starting Application..."
-$MVN_CMD exec:java -Dexec.mainClass="com.kiloux.restopos.Main"
+$ANT_CMD run

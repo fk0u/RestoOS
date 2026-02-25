@@ -1,6 +1,7 @@
 package com.kiloux.restopos.apps;
 
 import com.kiloux.restopos.config.UIConfig;
+import com.kiloux.restopos.gui.MainFrame;
 import com.kiloux.restopos.ui.MetroUtils;
 import java.awt.*;
 import javax.swing.*;
@@ -14,9 +15,15 @@ public class SettingsApp extends JInternalFrame {
 
     private CardLayout cardLayout;
     private JPanel contentPanel;
+    private final MainFrame mainFrame;
     
     public SettingsApp() {
+        this(null);
+    }
+
+    public SettingsApp(MainFrame mainFrame) {
         super("Settings", true, true, true, true);
+        this.mainFrame = mainFrame;
         setSize(800, 550);
         setFrameIcon(null);
         
@@ -88,26 +95,74 @@ public class SettingsApp extends JInternalFrame {
     // ========== PAGES ==========
     
     private JPanel createPersonalizePage() {
-        JPanel p = new JPanel(new GridLayout(3, 3, 20, 20));
+        JPanel p = new JPanel(new BorderLayout(20, 20));
         p.setBackground(MetroUtils.METRO_BG_DARK);
         p.setBorder(new EmptyBorder(30, 30, 30, 30));
-        
+
+        JPanel grid = new JPanel(new GridLayout(3, 3, 20, 20));
+        grid.setOpaque(false);
+
         JLabel lbl = new JLabel("Choose an accent color:");
         lbl.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         lbl.setForeground(Color.WHITE);
-        p.add(lbl);
-        p.add(new JLabel()); // Spacer
-        p.add(new JLabel()); // Spacer
+        grid.add(lbl);
+        grid.add(new JLabel());
+        grid.add(new JLabel());
         
         // Color Tiles
-        p.add(createColorTile(MetroUtils.ACCENT_CYAN, "Cyan"));
-        p.add(createColorTile(MetroUtils.ACCENT_PURPLE, "Purple"));
-        p.add(createColorTile(MetroUtils.ACCENT_GREEN, "Teal"));
-        p.add(createColorTile(MetroUtils.ACCENT_ORANGE, "Orange"));
-        p.add(createColorTile(new Color(200, 50, 50), "Red"));
-        p.add(createColorTile(new Color(80, 80, 80), "Gray"));
+        grid.add(createColorTile(MetroUtils.ACCENT_CYAN, "Cyan"));
+        grid.add(createColorTile(MetroUtils.ACCENT_PURPLE, "Purple"));
+        grid.add(createColorTile(MetroUtils.ACCENT_GREEN, "Teal"));
+        grid.add(createColorTile(MetroUtils.ACCENT_ORANGE, "Orange"));
+        grid.add(createColorTile(new Color(200, 50, 50), "Red"));
+        grid.add(createColorTile(new Color(80, 80, 80), "Gray"));
+
+        p.add(grid, BorderLayout.CENTER);
+
+        JPanel visualModePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
+        visualModePanel.setOpaque(false);
+
+        JLabel modeLabel = new JLabel("Visual Mode:");
+        modeLabel.setForeground(Color.WHITE);
+        modeLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        JButton ultraBtn = MetroUtils.createTileButton("Ultra Visual", MetroUtils.ACCENT_CYAN, e -> applyVisualProfile(true));
+        ultraBtn.setPreferredSize(new Dimension(150, 40));
+
+        JButton perfBtn = MetroUtils.createTileButton("Performance", new Color(90, 90, 90), e -> applyVisualProfile(false));
+        perfBtn.setPreferredSize(new Dimension(150, 40));
+
+        JLabel modeState = new JLabel(UIConfig.isImmersiveMode() ? "Current: Ultra Visual" : "Current: Performance");
+        modeState.setForeground(new Color(180, 220, 210));
+        modeState.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+
+        ultraBtn.addActionListener(e -> modeState.setText("Current: Ultra Visual"));
+        perfBtn.addActionListener(e -> modeState.setText("Current: Performance"));
+
+        visualModePanel.add(modeLabel);
+        visualModePanel.add(ultraBtn);
+        visualModePanel.add(perfBtn);
+        visualModePanel.add(modeState);
+
+        p.add(visualModePanel, BorderLayout.SOUTH);
         
         return p;
+    }
+
+    private void applyVisualProfile(boolean immersive) {
+        UIConfig.setImmersiveMode(immersive);
+        if (mainFrame != null) {
+            mainFrame.applyVisualProfile(immersive);
+        }
+
+        JOptionPane.showMessageDialog(
+            this,
+            immersive
+                ? "Mode diubah ke Ultra Visual. Efek ambience aktif."
+                : "Mode diubah ke Performance. Efek berat dimatikan.",
+            "Visual Profile",
+            JOptionPane.INFORMATION_MESSAGE
+        );
     }
     
     private JPanel createColorTile(Color c, String name) {

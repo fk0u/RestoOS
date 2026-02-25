@@ -61,12 +61,21 @@ public class CheckoutPanel extends JPanel {
     private MainFrame mainFrame;
     private CartService cartService;
     private OrderDAO orderDAO;
+    private com.kiloux.restopos.dao.VoucherDAO voucherDAO;
+    private com.kiloux.restopos.dao.CustomerDAO customerDAO;
     private DecimalFormat df = new DecimalFormat("#,###");
+
+    // New fields for 'Complete' Mock features
+    private String orderNote = "";
+    private double discountAmount = 0;
+    private String appliedVoucherCode = "";
 
     public CheckoutPanel(MainFrame frame) {
         this.mainFrame = frame;
         this.cartService = CartService.getInstance();
         this.orderDAO = new OrderDAO();
+        this.voucherDAO = new com.kiloux.restopos.dao.VoucherDAO();
+        this.customerDAO = new com.kiloux.restopos.dao.CustomerDAO();
         
         initComponents();
         
@@ -175,15 +184,15 @@ public class CheckoutPanel extends JPanel {
         advancedBox.add(btnSplitBill);
 
         btnVoucher.setText("Apply Voucher");
-        btnVoucher.addActionListener(e -> JOptionPane.showMessageDialog(this, "Voucher Applied: DISC10 (Mock)"));
+        btnVoucher.addActionListener(e -> handleVoucher());
         advancedBox.add(btnVoucher);
 
         btnMember.setText("Member Lookup");
-        btnMember.addActionListener(e -> JOptionPane.showMessageDialog(this, "Member Found: Gold Tier (Mock)"));
+        btnMember.addActionListener(e -> handleMemberLookup());
         advancedBox.add(btnMember);
 
         btnNote.setText("Add Note");
-        btnNote.addActionListener(e -> JOptionPane.showMessageDialog(this, "Kitchen Note Added."));
+        btnNote.addActionListener(e -> handleAddNote());
         advancedBox.add(btnNote);
 
         inputPanel.add(advancedBox);
@@ -309,6 +318,13 @@ public class CheckoutPanel extends JPanel {
         // Logic listeners
         btnCancel.addActionListener(e -> mainFrame.showCard("CART"));
         
+        // Listener for Customer Name Live Update
+        customerNameField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { generateReceiptPreview(); }
+            public void removeUpdate(DocumentEvent e) { generateReceiptPreview(); }
+            public void changedUpdate(DocumentEvent e) { generateReceiptPreview(); }
+        });
+        
         cashPaidField.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { updateChange(); }
             public void removeUpdate(DocumentEvent e) { updateChange(); }
@@ -334,7 +350,11 @@ public class CheckoutPanel extends JPanel {
 
     private void updateChange() {
         try {
-            double total = cartService.getTotal();
+            double total = cartService.getTotal() - discountAmount; // Apply discount logic
+            if (total < 0) total = 0;
+            
+            totalLabel.setText("Rp " + df.format(total)); // Refresh Total Label here too or ensure it's correct
+            
             double paid = Double.parseDouble(cashPaidField.getText());
             double change = paid - total;
             changeLabel.setText("Rp " + df.format(change));
@@ -345,7 +365,68 @@ public class CheckoutPanel extends JPanel {
         }
     }
     
+    private void handleAddNote() {
+        String input = JOptionPane.showInputDialog(this, "Enter Order Note:", orderNote);
+        if (input != null) {
+            orderNote = input;
+            generateReceiptPreview();
+        }
+    }
 
+    private void handleVoucher() {
+        String code = JOptionPane.showInputDialog(this, "Enter Voucher Code:", appliedVoucherCode);
+        if (code != null && !code.trim().isEmpty()) {
+            double discount = voucherDAO.getDiscountValue(code, cartService.getSubtotal());
+            
+            if (discount > 0) {
+                discountAmount = discount;
+                appliedVoucherCode = code.toUpperCase();
+                JOptionPane.showMessageDialog(this, "Voucher Applied: Rp " + df.format(discount) + " OFF!");
+            } else {
+                discountAmount = 0;
+                appliedVoucherCode = "";
+                JOptionPane.showMessageDialog(this, "Invalid Voucher Code or Expired", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            discountAmount = 0;
+            appliedVoucherCode = "";
+        }
+        updateChange(); // Recalc totals
+        generateReceiptPreview();
+    }
+    
+    private void handleMemberLookup() {
+        String input = JOptionPane.showInputDialog(this, "Enter Phone or Name:", "Member Lookup", JOptionPane.QUESTION_MESSAGE);
+        if(input != null && !input.isEmpty()) {
+            java.util.List<com.kiloux.restopos.model.Customer> list = customerDAO.searchCustomers(input);
+            if(list.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Member not found!", "Info", JOptionPane.WARNING_MESSAGE);
+            } else if(list.size() == 1) {
+                com.kiloux.restopos.model.Customer c = list.get(0);
+                customerNameField.setText(c.getName());
+                JOptionPane.showMessageDialog(this, "Member Found: " + c.getName() + "\nTier: " + c.getMembershipTier() + "\nPoints: " + c.getPoints(), "Member Info", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                // Multiple found
+                String[] options = new String[list.size()];
+                for(int i=0; i<list.size(); i++) {
+                    options[i] = list.get(i).getName() + " (" + list.get(i).getPhone() + ")";
+                }
+                String selected = (String) JOptionPane.showInputDialog(this, "Select Member:", "Multiple Results",
+                        JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                
+                if(selected != null) {
+                    for(int i=0; i<options.length; i++) {
+                        if(options[i].equals(selected)) {
+                            com.kiloux.restopos.model.Customer c = list.get(i);
+                            customerNameField.setText(c.getName());
+                            JOptionPane.showMessageDialog(this, "Member Selected: " + c.getName() + "\nTier: " + c.getMembershipTier(), "Member Info", JOptionPane.INFORMATION_MESSAGE);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     @Override
     protected void paintComponent(Graphics g) {
@@ -391,12 +472,23 @@ public class CheckoutPanel extends JPanel {
         sb.append(line).append("\n");
         String sub = df.format(cartService.getSubtotal());
         String tax = df.format(cartService.getTax());
-        String tot = df.format(cartService.getTotal());
+        String tot = df.format(cartService.getTotal() - discountAmount);
         
         sb.append(padRight("Subtotal", width/2)).append(padLeft(sub, width - width/2)).append("\n");
+        
+        if (discountAmount > 0) {
+            String discStr = "- " + df.format(discountAmount);
+             sb.append(padRight("Disc (" + appliedVoucherCode + ")", width/2)).append(padLeft(discStr, width - width/2)).append("\n");
+        }
+        
         sb.append(padRight("PPN (11%)", width/2)).append(padLeft(tax, width - width/2)).append("\n");
         sb.append(padRight("TOTAL", width/2)).append(padLeft(tot, width - width/2)).append("\n");
         sb.append(line).append("\n");
+        
+        if (!orderNote.isEmpty()) {
+            sb.append("Note: ").append(orderNote).append("\n");
+            sb.append(line).append("\n");
+        }
         
         centerText(sb, "THANK YOU!", width);
         
@@ -423,6 +515,9 @@ public class CheckoutPanel extends JPanel {
             return;
         }
         
+        double finalTotal = cartService.getTotal() - discountAmount;
+        if (finalTotal < 0) finalTotal = 0;
+        
         String method = "CASH";
         if (paymentTabs.getSelectedIndex() == 1) {
              method = "NON_CASH"; // Or specific value from combo
@@ -430,7 +525,7 @@ public class CheckoutPanel extends JPanel {
              // Validate Cash
              try {
                  double v = Double.parseDouble(cashPaidField.getText());
-                 if (v < cartService.getTotal()) {
+                 if (v < finalTotal) {
                      com.kiloux.restopos.utils.SoundManager.getInstance().play("error");
                      JOptionPane.showMessageDialog(this, "Insufficient Cash!", "Error", JOptionPane.WARNING_MESSAGE);
                      return;
@@ -446,15 +541,38 @@ public class CheckoutPanel extends JPanel {
         ord.setTableId(cartService.getSelectedTableId() == -1 ? 0 : cartService.getSelectedTableId());
         ord.setOrderType(orderType);
         ord.setStatus("PENDING");
-        ord.setCustomerName(customerNameField.getText());
-        ord.setTotalAmount(cartService.getTotal());
+        ord.setCustomerName(customerNameField.getText()); // Use pure customer name
+        ord.setNotes(orderNote); // Pass distinct note
+        ord.setDiscount(discountAmount); // Pass real discount
+        ord.setVoucherCode(appliedVoucherCode); // Pass real voucher code
+        ord.setTotalAmount(finalTotal);
         ord.setPaymentStatus("PAID");
         
         if (orderDAO.createOrder(ord, cartService.getItems()) != -1) {
             com.kiloux.restopos.utils.SoundManager.getInstance().play("success");
-            JOptionPane.showMessageDialog(this, "Transaction Successful!\nPrinting Receipt...", "Success", JOptionPane.INFORMATION_MESSAGE);
+            
+            // Auto-redirect to Onboarding (Table Select/Start) for fast turnover
+            // Show small toast or non-blocking notification? 
+            // For now, simpler: Show Message then Redirect.
+            
+            // int choice = JOptionPane.showConfirmDialog(this, "Transaction Successful! Open Kitchen View?", "Success", JOptionPane.YES_NO_OPTION);
+            
+            // Use Timer to auto-dismiss message? Or just standard OK.
+            JOptionPane.showMessageDialog(this, "Transaction Complete!\nOrder sent to Kitchen.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            
             cartService.clearCart();
+            
+            // Reset local fields
+            discountAmount = 0;
+            appliedVoucherCode = "";
+            orderNote = "";
+            customerNameField.setText("");
+            cashPaidField.setText("");
+            
+            // ALWAYS Return to Onboarding (Start Screen)
             mainFrame.showCard("ONBOARDING"); 
+            
+            // Logic: Kitchen is open in separate window (F12) usually, so we don't need to force switch.
         } else {
             com.kiloux.restopos.utils.SoundManager.getInstance().play("error");
             JOptionPane.showMessageDialog(this, "Transaction Failed Db Error", "Error", JOptionPane.ERROR_MESSAGE);

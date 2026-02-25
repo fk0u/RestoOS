@@ -18,7 +18,7 @@ done
 unset LD_LIBRARY_PATH
 unset LD_PRELOAD
 
-MVN_BIN="apache-maven-3.9.6/bin"
+ANT_BIN="apache-ant-1.10.14/bin"
 
 echo "======================================"
 echo "    RestoOS - Restaurant POS System   "
@@ -27,17 +27,17 @@ echo ""
 echo "Starting application..."
 echo ""
 
-if [ ! -d "$MVN_BIN" ]; then
-    if command -v mvn &> /dev/null; then
-        MVN_CMD="mvn"
+if [ ! -d "$ANT_BIN" ]; then
+    if command -v ant &> /dev/null; then
+        ANT_CMD="ant"
     else
-        echo "Error: Maven not found!"
-        echo "Please install Maven: sudo apt install maven"
+        echo "Error: Ant not found!"
+        echo "Please install Ant: sudo apt install ant"
         exit 1
     fi
 else
-    MVN_CMD="$MVN_BIN/mvn"
+    ANT_CMD="$ANT_BIN/ant"
 fi
 
 # Run the application
-$MVN_CMD exec:java -Dexec.mainClass="com.kiloux.restopos.Main"
+$ANT_CMD run

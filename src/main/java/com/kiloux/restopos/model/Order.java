@@ -13,6 +13,11 @@ public class Order {
     private String customerName;
     private int queueNumber;
     private java.util.List<CartItem> items; // Transient for Kitchen View
+    
+    // New Fields
+    private String notes;
+    private double discount;
+    private String voucherCode;
 
     public Order() {}
 
@@ -39,4 +44,11 @@ public class Order {
 
     public java.util.List<CartItem> getItems() { return items; }
     public void setItems(java.util.List<CartItem> items) { this.items = items; }
+    
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
+    public double getDiscount() { return discount; }
+    public void setDiscount(double discount) { this.discount = discount; }
+    public String getVoucherCode() { return voucherCode; }
+    public void setVoucherCode(String voucherCode) { this.voucherCode = voucherCode; }
 }

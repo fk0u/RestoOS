@@ -26,7 +26,7 @@ public class OrderDAO {
             order.setQueueNumber(nextQueue);
 
             // 2. Insert Order
-            String sqlVal = "INSERT INTO orders (table_id, order_type, status, total_amount, payment_status, customer_name, queue_number, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            String sqlVal = "INSERT INTO orders (table_id, order_type, status, total_amount, payment_status, customer_name, queue_number, created_at, notes, discount, voucher_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             pstmt = conn.prepareStatement(sqlVal, Statement.RETURN_GENERATED_KEYS);
             pstmt.setInt(1, order.getTableId());
             pstmt.setString(2, order.getOrderType());
@@ -35,9 +35,13 @@ public class OrderDAO {
             pstmt.setString(5, order.getPaymentStatus());
             pstmt.setString(6, order.getCustomerName());
             pstmt.setInt(7, nextQueue);
-            pstmt.setObject(8, LocalDateTime.now()); // Simple TS
+            pstmt.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // Simple TS
+            pstmt.setString(9, order.getNotes());
+            pstmt.setDouble(10, order.getDiscount());
+            pstmt.setString(11, order.getVoucherCode());
 
             int affectedRows = pstmt.executeUpdate();
+
 
             if (affectedRows == 0) {
                 throw new SQLException("Creating order failed, no rows affected.");
@@ -83,7 +87,11 @@ public class OrderDAO {
     
     // Logic: Count orders today + 1. Simple but enough for prototype.
     private int getNextQueueNumber(Connection conn) throws SQLException {
-        String sql = "SELECT MAX(queue_number) FROM orders WHERE DATE(created_at) = CURDATE()";
+        // SQLite compatible date check
+        String sql = "SELECT MAX(queue_number) FROM orders WHERE date(created_at) = date('now', 'localtime')";
+        // Note: For MySQL compatibility use: "SELECT MAX(queue_number) FROM orders WHERE DATE(created_at) = CURDATE()";
+        // But since we are targeting SQLite primarily now:
+        
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {
@@ -117,10 +125,26 @@ public class OrderDAO {
                 Order o = new Order();
                 o.setId(rs.getInt("id"));
                 o.setTableId(rs.getInt("table_id")); // Can use 0 for takeaway
+                o.setOrderType(rs.getString("order_type"));
                 o.setStatus(rs.getString("status"));
                 o.setQueueNumber(rs.getInt("queue_number"));
                 o.setCustomerName(rs.getString("customer_name"));
-                o.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                try {
+                    o.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                } catch (Exception ex) {
+                    // Fallback for bad timestamp format in SQLite
+                    String tsStr = rs.getString("created_at");
+                    if (tsStr != null) {
+                        try {
+                            o.setCreatedAt(LocalDateTime.parse(tsStr.replace(" ", "T")));
+                        } catch (Exception e2) {
+                            o.setCreatedAt(LocalDateTime.now());
+                        }
+                    } else {
+                        o.setCreatedAt(LocalDateTime.now());
+                    }
+                }
+                o.setNotes(rs.getString("notes")); // Fetch Notes
                 
                 // Fetch Items
                 o.setItems(getOrderItems(conn, o.getId()));

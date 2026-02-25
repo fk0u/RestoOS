@@ -30,6 +30,10 @@ A revolutionary Restaurant Operating System simulation built with **Java Swing**
 4.  **Task Manager**
     -   Monitor simulated CPU/Memory usage.
     -   View running processes.
+5.  **Swing Designer (Drag & Drop)**
+    -   Drag komponen (`Button`, `Label`, `TextField`, `CheckBox`) dari palette ke canvas.
+    -   Geser ulang posisi komponen secara langsung di canvas.
+    -   Generate kode Swing otomatis dari layout hasil desain.
 
 ### 🍽️ Core POS Functionality
 -   **Cashier Point of Sale**: Full cart, checkout, and receipt system.
@@ -40,10 +44,16 @@ A revolutionary Restaurant Operating System simulation built with **Java Swing**
 
 ### Prerequisites
 -   **Java JDK 17+**
+-   **Apache Ant 1.10+**
 -   **MySQL Server** (running on port 3306)
 
 ### Installation & Run
-1.  Double-click `run.bat` to launch the OS.
+1.  Jalankan build dan run dengan Ant:
+    ```bash
+    ant clean copy-resources
+    ant run
+    ```
+    atau langsung double-click `run.bat` (Windows).
 2.  **Login**:
     -   User: `admin`
     -   Pass: `admin`
@@ -60,8 +70,15 @@ guest@restoos:~$ ls        # List files
 ## 📂 Project Structure
 -   `com.kiloux.restopos.apps`: System Applications (Terminal, ControlPanel, Settings).
 -   `com.kiloux.restopos.gui`: Core POS Panels (MainFrame, AdminPanel, Checkout).
+-   `com.kiloux.restopos.gui.forms`: Swing Form Layer (`JPanel Form` dan `JFrame Form`).
 -   `com.kiloux.restopos.ui`: Custom UI Libraries (PlexUtils, RetroButton).
 -   `com.kiloux.restopos.utils`: Managers (Database, Sound).
+
+## 🧩 Swing Form Architecture
+-   Semua screen utama mengikuti pola Swing GUI berbasis `JPanel` (form konten) dan `JFrame` (window host).
+-   Contoh implementasi: `SwingDesignerPanelForm` (JPanel Form) dan `SwingDesignerFrameForm` (JFrame Form).
+-   Kompatibel NetBeans GUI Builder: tersedia `NbDesignerPanelForm` + `NbDesignerPanelForm.form` dan `NbDesignerFrameForm` + `NbDesignerFrameForm.form`.
+-   Panel inti juga sudah disiapkan untuk Design tab NetBeans: `OnboardingPanel.form`, `LoginPanel.form`, dan `RegisterPanel.form`.
 
 ---
 *Powered by Java Swing & Antipravity Engine*

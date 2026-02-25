@@ -1,20 +1,24 @@
 @echo off
 setlocal
 
-set MVN_BIN=apache-maven-3.9.6\bin
-set JAVA_HOME=%JAVA_HOME%
+set ANT_BIN=apache-ant-1.10.14\bin
 
-echo Checking for Maven...
-if not exist "%MVN_BIN%" (
-    echo Maven not found in %MVN_BIN%. Please ensure setup_run.ps1 has been run at least once to download dependencies, or manually install Maven.
-    pause
-    exit /b 1
+echo Checking for Ant...
+if exist "%ANT_BIN%" (
+    set "ANT_CMD=%~dp0%ANT_BIN%\ant.bat"
+) else (
+    where ant >nul 2>nul
+    if %ERRORLEVEL% NEQ 0 (
+        echo Ant not found. Install Apache Ant and make sure command 'ant' is available in PATH.
+        echo Download: https://ant.apache.org/bindownload.cgi
+        pause
+        exit /b 1
+    )
+    set "ANT_CMD=ant"
 )
 
-set PATH=%~dp0%MVN_BIN%;%PATH%
-
 echo Building Project...
-call mvn clean package -DskipTests
+call "%ANT_CMD%" clean copy-resources
 
 if %ERRORLEVEL% NEQ 0 (
     echo Build Failed!
@@ -23,6 +27,6 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo Starting Application...
-call mvn exec:java -Dexec.mainClass="com.kiloux.restopos.Main"
+call "%ANT_CMD%" run
 
 endlocal
