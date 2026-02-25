@@ -551,14 +551,16 @@ public class CheckoutPanel extends JPanel {
         if (orderDAO.createOrder(ord, cartService.getItems()) != -1) {
             com.kiloux.restopos.utils.SoundManager.getInstance().play("success");
             
-            // Auto-redirect to Onboarding (Table Select/Start) for fast turnover
-            // Show small toast or non-blocking notification? 
-            // For now, simpler: Show Message then Redirect.
-            
-            // int choice = JOptionPane.showConfirmDialog(this, "Transaction Successful! Open Kitchen View?", "Success", JOptionPane.YES_NO_OPTION);
-            
-            // Use Timer to auto-dismiss message? Or just standard OK.
-            JOptionPane.showMessageDialog(this, "Transaction Complete!\nOrder sent to Kitchen.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            try {
+                boolean printed = receiptArea.print();
+                if (printed) {
+                    JOptionPane.showMessageDialog(this, "Transaction Complete & Receipt Printed!\nOrder sent to Kitchen.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Transaction Complete!\nPrint cancelled.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (java.awt.print.PrinterException ex) {
+                JOptionPane.showMessageDialog(this, "Transaction Complete!\nFailed to print receipt: " + ex.getMessage(), "Success", JOptionPane.WARNING_MESSAGE);
+            }
             
             cartService.clearCart();
             
