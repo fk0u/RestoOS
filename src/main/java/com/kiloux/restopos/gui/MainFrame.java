@@ -848,6 +848,10 @@ public class MainFrame extends JFrame {
              // So we should divert to logic
              String role = com.kiloux.restopos.service.UserService.getInstance().getCurrentRole();
              unlockEnvironment(role);
+             
+             if ("ONBOARDING".equals(name) && cardLayout != null) {
+                 cardLayout.show(cardPanel, name);
+             }
         } else if ("LOGIN".equals(name)) {
             // Legacy logout
             desktop.removeAll();
